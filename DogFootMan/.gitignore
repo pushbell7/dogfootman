@@ -75,3 +75,7 @@ crashlytics-build.properties
 # Third Party Assets
 /[Aa]ssets/Rowlan/*
 /[Aa]ssets/Rowlan.meta
+/[Aa]ssets/ARCADE - FREE Racing Car/*
+/[Aa]ssets/ARCADE - FREE Racing Car.meta
+/[Aa]ssets/WhiteCity/*
+/[Aa]ssets/WhiteCity.meta
