@@ -38,12 +38,20 @@ public class ObjectManager : MonoBehaviour
 
     void DestroyObjects()
     {
-        const float DistanceToRemove = 120;
+        const float DistanceToRemove = 120f;
         Vector3 MainCharacterPosition = CenterObjectToManage.transform.position;
 
-        foreach(var spawnedObjects in SpawnedObjectMap)
+        foreach (var spawnedObjects in SpawnedObjectMap)
         {
-            spawnedObjects.Value.RemoveAll(element => Vector3.Distance(element.transform.position, MainCharacterPosition) > DistanceToRemove);
+            for(int i = spawnedObjects.Value.Count - 1; i >=0; --i)
+            {
+                var element = spawnedObjects.Value[i];
+                if (Vector3.Distance(element.transform.position, MainCharacterPosition) > DistanceToRemove)
+                {
+                    spawnedObjects.Value.RemoveAt(i);
+                    Destroy(element);
+                }
+            }
         }
     }
 
@@ -51,12 +59,13 @@ public class ObjectManager : MonoBehaviour
     {
         foreach (var spawnedObjects in SpawnedObjectMap)
         {
-            if (spawnedObjects.Value.Count < MaxCountForObjectMap[spawnedObjects.Key])
+            while (spawnedObjects.Value.Count < MaxCountForObjectMap[spawnedObjects.Key])
             {
                 GameObject SpawnedObject = Instantiate(PrefabsToManage[spawnedObjects.Key]);
                 // how do I decide y poistion on terrain?
-                // is it possible to spawn object far from main character slightly? I want to make object not to appear suddenly near main character.
-                SpawnedObject.transform.position = CenterObjectToManage.transform.position + new Vector3(Random.Range(-50, 50), 0, Random.Range(-50, 50));
+                Vector3 direction = new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized;
+                int size = Random.Range(25, 75);
+                SpawnedObject.transform.position = CenterObjectToManage.transform.position + (direction * size);
                 spawnedObjects.Value.Add(SpawnedObject);
             }
         }
