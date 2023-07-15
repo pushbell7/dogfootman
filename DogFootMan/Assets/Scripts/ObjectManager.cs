@@ -11,6 +11,9 @@ public class ObjectManager : MonoBehaviour
 
     private Dictionary<int, List<GameObject>> SpawnedObjectMap;
     private Dictionary<int, int> MaxCountForObjectMap;
+
+    private List<GameObject> BatchedRoads;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -25,6 +28,8 @@ public class ObjectManager : MonoBehaviour
             MaxCountForObjectMap.Add(index, temporaryMaxCounts[index]);
             index++;
         }
+
+        BatchedRoads = new List<GameObject>(GameObject.FindGameObjectsWithTag("Road"));
     }
 
     // Update is called once per frame
@@ -61,13 +66,47 @@ public class ObjectManager : MonoBehaviour
         {
             while (spawnedObjects.Value.Count < MaxCountForObjectMap[spawnedObjects.Key])
             {
-                GameObject SpawnedObject = Instantiate(PrefabsToManage[spawnedObjects.Key]);
-                // how do I decide y poistion on terrain?
-                Vector3 direction = new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized;
-                int size = Random.Range(25, 75);
-                SpawnedObject.transform.position = CenterObjectToManage.transform.position + (direction * size);
-                spawnedObjects.Value.Add(SpawnedObject);
+                GameObject spawnedObject = Instantiate(PrefabsToManage[spawnedObjects.Key]);
+                spawnedObject.transform.position = GeneratePosition(spawnedObject);
+                spawnedObjects.Value.Add(spawnedObject);
             }
         }
+    }
+
+    Vector3 GeneratePosition(GameObject spawnedObject)
+    {
+        Vector3 direction = new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized;
+        int size = Random.Range(25, 75);
+        Vector3 positionToSpawn = MoveOnTheRoad(CenterObjectToManage.transform.position + (direction * size));
+        positionToSpawn.y = Terrain.activeTerrain.SampleHeight(positionToSpawn) + (spawnedObject.GetComponent<Collider>().bounds.size.y / 2);
+
+        return positionToSpawn;
+    }
+
+    Vector3 MoveOnTheRoad(Vector3 originPosition)
+    {
+        float minimum = float.MaxValue;
+        Vector3 candidate = Vector3.zero;
+        string nameOfBoundsForDebugging = "";
+        foreach(var road in BatchedRoads)
+        {
+            var bounds = road.GetComponent<Renderer>().bounds;
+            originPosition.y = bounds.center.y;
+
+            if (bounds.Contains(originPosition))
+            {
+                return originPosition;
+            }
+
+            float distanceFromOrigin = bounds.SqrDistance(originPosition);
+            if (distanceFromOrigin < minimum)
+            {
+                candidate = bounds.ClosestPoint(originPosition);
+                minimum = distanceFromOrigin;
+                nameOfBoundsForDebugging = road.name;
+            }
+        }
+        Debug.Log(string.Format("origin {0}, result {1} from {2}", originPosition, candidate, nameOfBoundsForDebugging));
+        return candidate;
     }
 }
