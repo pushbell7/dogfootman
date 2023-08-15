@@ -153,6 +153,10 @@ public class ObjectManager : MonoBehaviour
         Quaternion inverseRotation = Quaternion.Euler(0f, 0f, rectangleRotation);
         Vector2 rotatedPoint = inverseRotation * translatedPoint;
 
+        const float PADDING = 1.0f;
+        halfRectangleSize.x -= PADDING;
+        halfRectangleSize.y -= PADDING;
+
         // Clamp the rotated point to the rectangle's bounds
         Vector2 clampedPoint = new Vector2(
             Mathf.Clamp(rotatedPoint.x, -halfRectangleSize.x, halfRectangleSize.x),
@@ -201,6 +205,6 @@ public class ObjectManager : MonoBehaviour
         Quaternion inverseRotation = Quaternion.Euler(0f, 0f, rectangleRotation);
         Vector2 rotatedPoint = inverseRotation * translatedPoint;
 
-        return (Mathf.Abs(rotatedPoint.x) < halfRectangleSize.x) && (Mathf.Abs(rotatedPoint.y) < halfRectangleSize.y); 
+        return (Mathf.Abs(rotatedPoint.x) <= halfRectangleSize.x) && (Mathf.Abs(rotatedPoint.y) <= halfRectangleSize.y); 
     }
 }
