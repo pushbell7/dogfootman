@@ -4,43 +4,64 @@ using UnityEngine;
 
 public class CarController : MonoBehaviour
 {
-    Rigidbody rigidBody;
-    ObjectManager objectManagerRef;
+    Rigidbody RigidBody;
+    ObjectManager ObjectManagerRef;
     GameObject CurrentRoad;
     Vector3 DirectionOfMovement;
 
     // Start is called before the first frame update
     void Start()
     {
-        rigidBody = GetComponent<Rigidbody>();
+        RigidBody = GetComponent<Rigidbody>();
 
-        objectManagerRef = GameObject.Find("ObjectManager").GetComponent<ObjectManager>();
-        CurrentRoad = objectManagerRef.FindRoadOn(gameObject.transform.position);
+        ObjectManagerRef = GameObject.Find("ObjectManager").GetComponent<ObjectManager>();
+        CurrentRoad = ObjectManagerRef.FindRoadOn(gameObject.transform.position);
         if(CurrentRoad == null)
         {
             Debug.Log(string.Format("error {0}", gameObject.transform.position));
         }
+        MakeMovingDirection();
+    }
+
+    void MakeMovingDirection()
+    {
         bool bIsForward = IsForwardDirectionInRotatedRectangle();
 
         DirectionOfMovement = CurrentRoad.transform.forward * (bIsForward ? 1 : -1);
-
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         var ray = new Ray(transform.position, DirectionOfMovement);
 
         const float SafeDistance = 15.0f;
         if(Physics.Raycast(ray, SafeDistance))
         {
-            Debug.DrawRay(transform.position, DirectionOfMovement, Color.red, 100.0f);
             Brake();
         }
         else
         {
             Accelerate();
         }
+
+        var newRoad = ObjectManagerRef.FindRoadOn(gameObject.transform.position);
+        if(newRoad && newRoad != CurrentRoad)
+        {
+            CurrentRoad = newRoad;
+
+            MakeMovingDirection();
+        }
+
+        MakeHovering();
+    }
+
+    // to prevent this object from becoming stuck to the road
+    void MakeHovering()
+    {
+        var position = transform.position;
+        position.y = CurrentRoad.transform.position.y + 0.1f;
+        transform.position = position;
     }
 
     bool IsForwardDirectionInRotatedRectangle()
@@ -63,18 +84,18 @@ public class CarController : MonoBehaviour
     void Accelerate()
     {
         const float Power = 10000f; // it should be managed in MyCharacter ability container
-        rigidBody.AddForce(DirectionOfMovement * Time.deltaTime * Power, ForceMode.Acceleration);
+        RigidBody.AddForce(DirectionOfMovement * Time.deltaTime * Power, ForceMode.Acceleration);
 
         const float MaxSpeed = 10f;
-        rigidBody.velocity = Vector3.ClampMagnitude(rigidBody.velocity, MaxSpeed);
+        RigidBody.velocity = Vector3.ClampMagnitude(RigidBody.velocity, MaxSpeed);
     }
 
     void Brake()
     {
-        if (rigidBody.velocity.magnitude > 100.0f)
+        if (RigidBody.velocity.magnitude > 100.0f)
         {
             const float Power = 20000f;
-            rigidBody.AddForce(-rigidBody.velocity.normalized * Time.deltaTime * Power, ForceMode.Acceleration);
+            RigidBody.AddForce(-RigidBody.velocity.normalized * Time.deltaTime * Power, ForceMode.Acceleration);
         }
     }
 }
