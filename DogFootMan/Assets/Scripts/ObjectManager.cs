@@ -11,6 +11,7 @@ public class ObjectManager : MonoBehaviour
 
     private Dictionary<int, List<GameObject>> SpawnedObjectMap;
     private Dictionary<int, int> MaxCountForObjectMap;
+    private Dictionary<int, int> CurrentIndexMap;
 
     private List<GameObject> BatchedRoads;
 
@@ -19,6 +20,7 @@ public class ObjectManager : MonoBehaviour
     {
         SpawnedObjectMap = new Dictionary<int, List<GameObject>>();
         MaxCountForObjectMap = new Dictionary<int, int>();
+        CurrentIndexMap = new Dictionary<int, int>();
 
         int index = 0;
         int[] temporaryMaxCounts = { 20, 10, 5, };
@@ -26,6 +28,7 @@ public class ObjectManager : MonoBehaviour
         {
             SpawnedObjectMap.Add(index, new List<GameObject>());
             MaxCountForObjectMap.Add(index, temporaryMaxCounts[index]);
+            CurrentIndexMap.Add(index, 0);
             index++;
         }
 
@@ -39,7 +42,7 @@ public class ObjectManager : MonoBehaviour
     {
         if (CenterObjectToManage == null) return;
 
-        DestroyObjects();
+        //DestroyObjects();
         SpawnObjects();
     }
 
@@ -64,14 +67,23 @@ public class ObjectManager : MonoBehaviour
 
     void SpawnObjects()
     {
+        string[] temporaryName = { "car", "human", "item" };
+        int index = 0;
         foreach (var spawnedObjects in SpawnedObjectMap)
         {
+            string curruentName = temporaryName[index];
             while (spawnedObjects.Value.Count < MaxCountForObjectMap[spawnedObjects.Key])
             {
                 GameObject spawnedObject = Instantiate(PrefabsToManage[spawnedObjects.Key]);
                 spawnedObject.transform.position = GeneratePosition(spawnedObject);
+
+                int indexOfCurrentType = CurrentIndexMap[index];
+                spawnedObject.name = string.Format("{0}{1}", curruentName, indexOfCurrentType);
+                CurrentIndexMap[index] = ++indexOfCurrentType;
+
                 spawnedObjects.Value.Add(spawnedObject);
             }
+            index++;
         }
     }
 

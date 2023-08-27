@@ -11,6 +11,8 @@ public class CarController : MonoBehaviour
     public int LaneToUse;
     public int CurrentLane;
 
+    Vector3 DestinationInLane;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -35,6 +37,8 @@ public class CarController : MonoBehaviour
         var roadInfo = CurrentRoad.GetComponent<RoadInfo>();
         int maxCount = bIsForward ? roadInfo.ForwardLaneCount : roadInfo.BackwardLaneCount;
         LaneToUse = Random.Range(1, maxCount + 1) * (bIsForward ? 1 : -1);
+
+        DestinationInLane = roadInfo.GetDestinationOfLane(LaneToUse);
     }
 
     // Update is called once per frame
@@ -44,9 +48,12 @@ public class CarController : MonoBehaviour
 
         const float SafeDistance = 15.0f;
         Debug.DrawRay(transform.position, ray.direction * SafeDistance, Color.red);
-        if (Physics.Raycast(ray, SafeDistance))
+        Debug.DrawLine(transform.position, DestinationInLane, Color.green);
+        RaycastHit hitResult;
+        if (Physics.Raycast(ray, out hitResult, SafeDistance))
         {
             Brake();
+            return;
         }
         else
         {
@@ -57,7 +64,10 @@ public class CarController : MonoBehaviour
         if(newRoad && newRoad != CurrentRoad)
         {
             CurrentRoad = newRoad;
+        }
 
+        if((transform.position - DestinationInLane).magnitude < 1.0f)
+        {
             SetReadyToRunOnCurrentRoad();
         }
 
@@ -92,19 +102,9 @@ public class CarController : MonoBehaviour
     void Accelerate()
     {
         const float Power = 10000f; // it should be managed in MyCharacter ability container
-        var directionToForce = DirectionOfMovement;
 
         CurrentLane = CurrentRoad.GetComponent<RoadInfo>().GetTheNumberOfLane(transform.position);
-        //if (LaneToUse * CurrentLane > 0)
-        //{
-        //    directionToForce += CurrentRoad.transform.right * (LaneToUse - CurrentLane) * 0.1f;
-        //}
-
-        var centerOfLane = CurrentRoad.GetComponent<RoadInfo>().GetCenterOfLanePosition(LaneToUse, transform.position);
-        directionToForce += (centerOfLane - transform.position) * 0.1f;
-        RigidBody.AddForce(directionToForce * Time.deltaTime * Power, ForceMode.Acceleration);
-
-        Debug.DrawRay(transform.position, directionToForce * 10.0f, Color.blue);
+        RigidBody.AddForce((DestinationInLane - transform.position).normalized * Time.deltaTime * Power, ForceMode.Acceleration);
 
         const float MaxSpeed = 10f;
         RigidBody.velocity = Vector3.ClampMagnitude(RigidBody.velocity, MaxSpeed);
