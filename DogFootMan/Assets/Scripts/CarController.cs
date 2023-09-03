@@ -13,6 +13,8 @@ public class CarController : MonoBehaviour
 
     Vector3 DestinationInLane;
 
+    bool bIsWaiting;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -50,7 +52,8 @@ public class CarController : MonoBehaviour
         Debug.DrawRay(transform.position, ray.direction * SafeDistance, Color.red);
         Debug.DrawLine(transform.position, DestinationInLane, Color.green);
         RaycastHit hitResult;
-        if (Physics.Raycast(ray, out hitResult, SafeDistance))
+        Physics.Raycast(ray, out hitResult, SafeDistance);
+        if (bIsWaiting || (hitResult.collider && hitResult.collider.tag == "Obstacles"))
         {
             Brake();
             return;
@@ -117,5 +120,10 @@ public class CarController : MonoBehaviour
             const float Power = 20000f;
             RigidBody.AddForce(-RigidBody.velocity.normalized * Time.deltaTime * Power, ForceMode.Acceleration);
         }
+    }
+
+    public void SetWait(bool bInWait)
+    {
+        bIsWaiting = bInWait;
     }
 }

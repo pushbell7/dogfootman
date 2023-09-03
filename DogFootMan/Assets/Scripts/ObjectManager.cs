@@ -81,6 +81,8 @@ public class ObjectManager : MonoBehaviour
                 spawnedObject.name = string.Format("{0}{1}", curruentName, indexOfCurrentType);
                 CurrentIndexMap[index] = ++indexOfCurrentType;
 
+                spawnedObject.tag = "Obstacles";
+
                 spawnedObjects.Value.Add(spawnedObject);
             }
             index++;
