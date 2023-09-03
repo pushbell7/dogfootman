@@ -82,4 +82,27 @@ public class RoadInfo : MonoBehaviour
 
         return (bIsForward ? 1 : -1) * (theNumberOfLane + 1);
     }
+
+    public bool IsRoadOn(Vector3 positionToCheck)
+    {
+        var boxCollider = GetComponent<BoxCollider>();
+        var center = transform.position + boxCollider.center;
+        float xScale = boxCollider.size.x * transform.localScale.x / 2;
+        float zScale = boxCollider.size.z * transform.localScale.z / 2;
+
+        return IsInRotatedRectangle(new Vector2(positionToCheck.x, positionToCheck.z), new Vector2(center.x, center.z), new Vector2(xScale, zScale), transform.rotation.eulerAngles.y);
+    }
+
+    bool IsInRotatedRectangle(Vector2 point, Vector2 rectanglePosition, Vector2 halfRectangleSize, float rectangleRotation)
+    {
+        // Translate the point to the rectangle's local coordinate space
+        Vector2 center = rectanglePosition;
+        Vector2 translatedPoint = point - center;
+
+        // Apply the inverse rotation of the rectangle to the translated point
+        Quaternion inverseRotation = Quaternion.Euler(0f, 0f, rectangleRotation);
+        Vector2 rotatedPoint = inverseRotation * translatedPoint;
+
+        return (Mathf.Abs(rotatedPoint.x) <= halfRectangleSize.x) && (Mathf.Abs(rotatedPoint.y) <= halfRectangleSize.y);
+    }
 }
