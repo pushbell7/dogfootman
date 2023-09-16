@@ -4,22 +4,16 @@ using UnityEngine;
 
 public class TrafficControlTrigger : MonoBehaviour
 {
-    List<GameObject> WaitingObjectUnderControl;
+    Dictionary<GameObject, List<GameObject>> WaitingObjectUnderControl;
+    int CurrentTrafficIndex;
 
-    enum TrafficState
-    {
-        Horizontal,
-        Vertical,
-        MAX
-    }
-    private TrafficState CurrentTrafficState;
     private List<GameObject> ConnectedRoads;
     private Dictionary<GameObject, List<Vector3>> CandidatePointMap;
 
     // Start is called before the first frame update
     void Start()
     {
-        WaitingObjectUnderControl = new List<GameObject>();
+        WaitingObjectUnderControl = new Dictionary<GameObject, List<GameObject>>();
 
         // get connected roads in this volume
         ConnectedRoads = new List<GameObject>();
@@ -34,6 +28,7 @@ public class TrafficControlTrigger : MonoBehaviour
             if (selectedCollider.CompareTag("Road"))
             {
                 ConnectedRoads.Add(selectedCollider.gameObject);
+                WaitingObjectUnderControl.Add(selectedCollider.gameObject, new List<GameObject>());
             }
         }
 
@@ -59,7 +54,6 @@ public class TrafficControlTrigger : MonoBehaviour
 
             CandidatePointMap.Add(road, candidatePoint);
         }
-
     }
     void OnDrawGizmos()
     {
@@ -76,41 +70,93 @@ public class TrafficControlTrigger : MonoBehaviour
     private void Update()
     {
         const float INTERVAL = 5;
-        CurrentTrafficState = (TrafficState)(Time.time / INTERVAL % (int)TrafficState.MAX);
+        CurrentTrafficIndex = (int)(Time.time / INTERVAL) % WaitingObjectUnderControl.Count;
 
-        switch(CurrentTrafficState)
+        int index = 0;
+        foreach(var waitingList in WaitingObjectUnderControl)
         {
-            case TrafficState.Horizontal:
-                WaitingObjectUnderControl.ForEach(obj => obj.GetComponent<CarController>()?.SetWait(false));
-                break;
-            case TrafficState.Vertical:
-                WaitingObjectUnderControl.ForEach(obj => obj.GetComponent<CarController>()?.SetWait(true));
-                break;
-            default: break;
+            waitingList.Value.ForEach(obj => obj.GetComponent<CarController>()?.SetWait(index == CurrentTrafficIndex));
+            index++;
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        WaitingObjectUnderControl.Add(other.gameObject);
-
-        MakeDestination(other.gameObject);
+        var carController = other.gameObject.GetComponent<CarController>();
+        if (carController)
+        {
+            var road = ObjectManager.Get().FindRoadOn(other.transform.position);
+            if (road)
+            {
+                WaitingObjectUnderControl[road].Add(other.gameObject);
+                carController.SetTraffic(true);
+            }
+            MakeDestination(other.gameObject);
+        }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        WaitingObjectUnderControl.Remove(other.gameObject);
-
-        other.gameObject.GetComponent<CarController>()?.SetWait(false);
+        var carController = other.gameObject.GetComponent<CarController>();
+        if (carController)
+        {
+            var road = ObjectManager.Get().FindRoadOn(other.transform.position);
+            if (road)
+            {
+                WaitingObjectUnderControl[road].Remove(other.gameObject);
+            }
+            carController.SetWait(false);
+            carController.SetTraffic(false);
+        }
     }
 
     void MakeDestination(GameObject InObject)
     {
-        // @TODO: flow control 
-        // 1. define connected road count
-        //ConnectedRoads.Count;
-        // 2. which road is InObject on?
-        // 3. which lane does InObject use?
-        // 4. find road to use and decide point from CandidatePointMap
+        var road = ObjectManager.Get().FindRoadOn(InObject.transform.position);
+        if(road)
+        {
+            var lane = road.GetComponent<RoadInfo>().GetTheNumberOfLane(InObject.transform.position);
+            InObject.GetComponent<CarController>()?.SetDestination(GetDestination(road, lane));
+        }
+    }
+
+    Vector3 GetDestination(GameObject currentRoad, int lane)
+    {
+        GameObject rightestRoad = null;
+        float maximumDotResult = float.MinValue;
+        
+        foreach(var road in ConnectedRoads)
+        {
+            if (road == currentRoad) continue;
+            float dot = Vector3.Dot((road.transform.position - currentRoad.transform.position).normalized, currentRoad.transform.right);
+            if(dot > maximumDotResult)
+            {
+                maximumDotResult = dot;
+                rightestRoad = road;
+            }
+        }
+
+        if(IsEdgeLane(currentRoad, lane))
+        {
+            return CandidatePointMap[rightestRoad].FindLast( param =>{ return true; });
+        }
+        else
+        {
+            var leftRoads = ConnectedRoads.FindAll(param => { return param != rightestRoad && param != currentRoad; });
+            var targetRoad = leftRoads[Random.Range(0, leftRoads.Count)];
+            return CandidatePointMap[targetRoad].Find(param => { return true; });
+        }
+    }
+    bool IsEdgeLane(GameObject currentRoad, int lane)
+    {
+        var roadInfo = currentRoad.GetComponent<RoadInfo>();
+        if (lane < 0)
+        {
+            return -lane == roadInfo.BackwardLaneCount;
+        }
+        else
+        {
+            return lane == roadInfo.ForwardLaneCount;
+        }
     }
 }

@@ -59,6 +59,7 @@ public class RoadInfo : MonoBehaviour
         return currentPositionOfRunningObject += myPosition;
     }
 
+    // TODO it should be cached
     public Vector3 GetDestinationOfLane(int lane)
     {
         var destination = GetDestinationOfLaneImpl(lane);
@@ -78,10 +79,12 @@ public class RoadInfo : MonoBehaviour
         return destination;
     }
 
+    // TODO it should be cached
     public Vector3 GetStartingPointOfLane(int lane)
     {
         var boxCollider = GetComponent<BoxCollider>();
         var halfSizeZ = boxCollider.size.z * gameObject.transform.localScale.z / 2;
+        halfSizeZ *= 0.9f;
         float laneWidth = boxCollider.size.x * gameObject.transform.localScale.x / (ForwardLaneCount + BackwardLaneCount);
         float centerOfLane = laneWidth * lane - (lane > 0 ? 1 : -1) * laneWidth / 2;
         Vector2 destination = new Vector2(centerOfLane, lane > 0 ? -halfSizeZ : halfSizeZ);

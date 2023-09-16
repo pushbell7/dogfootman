@@ -5,7 +5,6 @@ using UnityEngine;
 public class CarController : MonoBehaviour
 {
     Rigidbody RigidBody;
-    ObjectManager ObjectManagerRef;
     GameObject CurrentRoad;
     Vector3 DirectionOfMovement;
     public int LaneToUse;
@@ -14,14 +13,14 @@ public class CarController : MonoBehaviour
     Vector3 DestinationInLane;
 
     bool bIsWaiting;
+    bool bIsUnderTheControlTraffic = false;
 
     // Start is called before the first frame update
     void Start()
     {
         RigidBody = GetComponent<Rigidbody>();
 
-        ObjectManagerRef = GameObject.Find("ObjectManager").GetComponent<ObjectManager>();
-        CurrentRoad = ObjectManagerRef.FindRoadOn(gameObject.transform.position);
+        CurrentRoad = ObjectManager.Get().FindRoadOn(gameObject.transform.position);
         if(CurrentRoad == null)
         {
             Debug.Log(string.Format("error {0}", gameObject.transform.position));
@@ -51,9 +50,20 @@ public class CarController : MonoBehaviour
         const float SafeDistance = 15.0f;
         Debug.DrawRay(transform.position, ray.direction * SafeDistance, Color.red);
         Debug.DrawLine(transform.position, DestinationInLane, Color.green);
+
+        if(bIsUnderTheControlTraffic)
+        {
+            if (bIsWaiting)
+                Brake();
+            else
+                Accelerate();
+            return;
+        }
+
+
         RaycastHit hitResult;
         Physics.Raycast(ray, out hitResult, SafeDistance);
-        if (bIsWaiting || (hitResult.collider && hitResult.collider.tag == "Obstacles"))
+        if ((hitResult.collider && hitResult.collider.tag == "Obstacles"))
         {
             Brake();
             return;
@@ -63,7 +73,7 @@ public class CarController : MonoBehaviour
             Accelerate();
         }
 
-        var newRoad = ObjectManagerRef.FindRoadOn(gameObject.transform.position);
+        var newRoad = ObjectManager.Get().FindRoadOn(gameObject.transform.position);
         if(newRoad && newRoad != CurrentRoad)
         {
             CurrentRoad = newRoad;
@@ -74,15 +84,11 @@ public class CarController : MonoBehaviour
             SetReadyToRunOnCurrentRoad();
         }
 
-        MakeHovering();
     }
 
-    // to prevent this object from becoming stuck to the road
-    void MakeHovering()
+    public void SetTraffic(bool bIsSet)
     {
-        var position = transform.position;
-        position.y = CurrentRoad.transform.position.y + 0.5f;
-        transform.position = position;
+        bIsUnderTheControlTraffic = bIsSet;
     }
 
     bool IsForwardDirectionInRotatedRectangle()
@@ -125,5 +131,10 @@ public class CarController : MonoBehaviour
     public void SetWait(bool bInWait)
     {
         bIsWaiting = bInWait;
+    }
+
+    public void SetDestination(Vector3 destination)
+    {
+        DestinationInLane = destination;
     }
 }

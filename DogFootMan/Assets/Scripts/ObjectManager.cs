@@ -15,6 +15,11 @@ public class ObjectManager : MonoBehaviour
 
     private List<GameObject> BatchedRoads;
 
+    static public ObjectManager Get()
+    {
+        return GameObject.Find("ObjectManager").GetComponent<ObjectManager>();
+    }
+
     // Start is called before the first frame update
     void Start()
     {
