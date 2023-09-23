@@ -6,14 +6,157 @@ public class CarController : MonoBehaviour
 {
     Rigidbody RigidBody;
     GameObject CurrentRoad;
-    Vector3 DirectionOfMovement;
     public int LaneToUse;
-    public int CurrentLane;
 
-    Vector3 DestinationInLane;
 
-    bool bIsWaiting;
-    bool bIsUnderTheControlTraffic = false;
+
+    class CarRotator
+    {
+        Quaternion InitialRotation;
+        Quaternion TargetRotation;
+        float TimeToStartRotation;
+        CarController Car;
+        Vector3 Destination;
+
+        public CarRotator(CarController inCar, Vector3 inDestination)
+        {
+            Car = inCar;
+            InitialRotation = inCar.transform.rotation;
+            Destination = inDestination;
+            TimeToStartRotation = Time.time;
+            TargetRotation = Quaternion.LookRotation(inDestination - inCar.transform.position);
+        }
+
+        public void Rotate()
+        {
+            float deltaTime = Time.time - TimeToStartRotation;
+            const float TIME_SCALE_TO_ROTATE = 3f;
+            Car.transform.rotation = Quaternion.Lerp(InitialRotation, TargetRotation, deltaTime * TIME_SCALE_TO_ROTATE);
+
+            if (deltaTime * TIME_SCALE_TO_ROTATE > 1)
+            {
+                Car.transform.rotation = Quaternion.LookRotation(Destination - Car.transform.position);
+                Car.RemoveRotator();
+            }
+        }
+    };
+    CarRotator RotatorForThisCar;
+    public void RemoveRotator()
+    {
+        RotatorForThisCar = null;
+    }
+
+    abstract class ICarMover
+    {
+        protected CarController Car;
+        Vector3 DestinationInLane;
+        protected Vector3 DirectionOfMovement;
+
+        public ICarMover(CarController inCar)
+        {
+            Car = inCar;
+        }
+        public void MakeDestination()
+        {
+            bool bIsForward = Car.IsForwardDirectionInRotatedRectangle();
+            DirectionOfMovement = Car.CurrentRoad.transform.forward * (bIsForward ? 1 : -1);
+
+            var roadInfo = Car.CurrentRoad.GetComponent<RoadInfo>();
+            int maxCount = bIsForward ? roadInfo.ForwardLaneCount : roadInfo.BackwardLaneCount;
+            int LaneToUse = Random.Range(1, maxCount + 1) * (bIsForward ? 1 : -1);
+
+            DestinationInLane = roadInfo.GetDestinationOfLane(LaneToUse);
+        }
+
+        public void Accelerate()
+        {
+            if (Car.RotatorForThisCar != null)
+            {
+                Car.RotatorForThisCar.Rotate();
+            }
+            const float Power = 10000f; // it should be managed in MyCharacter ability container
+            
+            Car.RigidBody.AddForce(Car.transform.forward * Time.deltaTime * Power, ForceMode.Acceleration);
+
+            const float MaxSpeed = 10f;
+            Car.RigidBody.velocity = Vector3.ClampMagnitude(Car.RigidBody.velocity, MaxSpeed);
+
+        }
+        public void Brake()
+        {
+            if (Car.RigidBody.velocity.magnitude > 10.0f)
+            {
+                const float Power = 20000f;
+                Car.RigidBody.AddForce(-Car.RigidBody.velocity.normalized * Time.deltaTime * Power, ForceMode.Acceleration);
+            }
+        }
+        public void SetDestination(Vector3 inDestination)
+        {
+            DestinationInLane = inDestination;
+        }
+        public Vector3 GetDestination()
+        {
+            return DestinationInLane;
+        }
+        public Vector3 GetDirection()
+        {
+            return DirectionOfMovement;
+        }
+        public abstract void Move();
+
+    };
+
+    class CarMoverAlongTheRoad : ICarMover
+    {
+        public CarMoverAlongTheRoad(CarController inCar) : base(inCar)
+        {
+            MakeDestination();
+            inCar.RotatorForThisCar = new CarRotator(inCar, GetDestination());
+        }
+
+        public override void Move()
+        {
+            var ray = new Ray(Car.transform.position, DirectionOfMovement);
+            const float SafeDistance = 15.0f;
+            RaycastHit hitResult;
+            Physics.Raycast(ray, out hitResult, SafeDistance);
+            if ((hitResult.collider && hitResult.collider.tag == "Obstacles"))
+            {
+                Brake();
+            }
+            else
+            {
+                Accelerate();
+            }
+        }
+    }
+    class CarMoverUnderTheTraffic : ICarMover
+    {
+        bool bIsWaiting;
+        public CarMoverUnderTheTraffic(CarController inCar) : base(inCar)
+        {
+
+        }
+
+        public override void Move()
+        {
+            if (bIsWaiting)
+            {
+                Brake();
+            }
+            else
+            {
+                Accelerate();
+            }
+        }
+
+        public void SetWait(bool bWait)
+        {
+            bIsWaiting = bWait;
+        }
+    }
+
+    ICarMover MoverForThisCar;
 
     // Start is called before the first frame update
     void Start()
@@ -25,70 +168,45 @@ public class CarController : MonoBehaviour
         {
             Debug.Log(string.Format("error {0}", gameObject.transform.position));
         }
-        SetReadyToRunOnCurrentRoad();
+
+        MoverForThisCar = new CarMoverAlongTheRoad(this);
+        RotatorForThisCar = new CarRotator(this, MoverForThisCar.GetDestination());
     }
 
-    void SetReadyToRunOnCurrentRoad()
-    {
-        bool bIsForward = IsForwardDirectionInRotatedRectangle();
-
-        DirectionOfMovement = CurrentRoad.transform.forward * (bIsForward ? 1 : -1);
-
-        // Decide which lane this is going to use
-        var roadInfo = CurrentRoad.GetComponent<RoadInfo>();
-        int maxCount = bIsForward ? roadInfo.ForwardLaneCount : roadInfo.BackwardLaneCount;
-        LaneToUse = Random.Range(1, maxCount + 1) * (bIsForward ? 1 : -1);
-
-        DestinationInLane = roadInfo.GetDestinationOfLane(LaneToUse);
-    }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        var ray = new Ray(transform.position, DirectionOfMovement);
+        // make rule
+        // stop in traffic
+        // go to destination and set next road
+        var ray = new Ray(transform.position, MoverForThisCar.GetDirection());
 
         const float SafeDistance = 15.0f;
         Debug.DrawRay(transform.position, ray.direction * SafeDistance, Color.red);
-        Debug.DrawLine(transform.position, DestinationInLane, Color.green);
+        Debug.DrawLine(transform.position, MoverForThisCar.GetDestination(), Color.green);
+        Debug.DrawLine(transform.position, transform.position + transform.forward * 5, Color.blue);
 
-        if(bIsUnderTheControlTraffic)
-        {
-            if (bIsWaiting)
-                Brake();
-            else
-                Accelerate();
-            return;
-        }
-
-
-        RaycastHit hitResult;
-        Physics.Raycast(ray, out hitResult, SafeDistance);
-        if ((hitResult.collider && hitResult.collider.tag == "Obstacles"))
-        {
-            Brake();
-            return;
-        }
-        else
-        {
-            Accelerate();
-        }
+        MoverForThisCar.Move();
 
         var newRoad = ObjectManager.Get().FindRoadOn(gameObject.transform.position);
         if(newRoad && newRoad != CurrentRoad)
         {
             CurrentRoad = newRoad;
+            (MoverForThisCar as CarMoverAlongTheRoad)?.MakeDestination();
         }
-
-        if((transform.position - DestinationInLane).magnitude < 1.0f)
-        {
-            SetReadyToRunOnCurrentRoad();
-        }
-
     }
 
     public void SetTraffic(bool bIsSet)
     {
-        bIsUnderTheControlTraffic = bIsSet;
+        if(bIsSet)
+        {
+            MoverForThisCar = new CarMoverUnderTheTraffic(this);
+        }
+        else
+        {
+            MoverForThisCar = new CarMoverAlongTheRoad(this);
+        }
     }
 
     bool IsForwardDirectionInRotatedRectangle()
@@ -108,33 +226,14 @@ public class CarController : MonoBehaviour
         return rotatedPoint.x > 0;
     }
 
-    void Accelerate()
-    {
-        const float Power = 10000f; // it should be managed in MyCharacter ability container
-
-        CurrentLane = CurrentRoad.GetComponent<RoadInfo>().GetTheNumberOfLane(transform.position);
-        RigidBody.AddForce((DestinationInLane - transform.position).normalized * Time.deltaTime * Power, ForceMode.Acceleration);
-
-        const float MaxSpeed = 10f;
-        RigidBody.velocity = Vector3.ClampMagnitude(RigidBody.velocity, MaxSpeed);
-    }
-
-    void Brake()
-    {
-        if (RigidBody.velocity.magnitude > 100.0f)
-        {
-            const float Power = 20000f;
-            RigidBody.AddForce(-RigidBody.velocity.normalized * Time.deltaTime * Power, ForceMode.Acceleration);
-        }
-    }
-
     public void SetWait(bool bInWait)
     {
-        bIsWaiting = bInWait;
+        (MoverForThisCar as CarMoverUnderTheTraffic)?.SetWait(bInWait);
     }
 
     public void SetDestination(Vector3 destination)
     {
-        DestinationInLane = destination;
+        (MoverForThisCar as CarMoverUnderTheTraffic).SetDestination(destination);
+        RotatorForThisCar = new CarRotator(this, destination);
     }
 }

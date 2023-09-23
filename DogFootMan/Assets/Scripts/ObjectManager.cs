@@ -6,7 +6,7 @@ public class ObjectManager : MonoBehaviour
 {
     // can i link fields together for customization purpose?
     // like Prefabs matched with maximum count to control and spawning position
-    public List<GameObject> PrefabsToManage;
+    public List<GameObject> PrefabsToManage; // car, human, something
     public GameObject CenterObjectToManage;
 
     private Dictionary<int, List<GameObject>> SpawnedObjectMap;
@@ -28,7 +28,7 @@ public class ObjectManager : MonoBehaviour
         CurrentIndexMap = new Dictionary<int, int>();
 
         int index = 0;
-        int[] temporaryMaxCounts = { 20, 10, 5, };
+        int[] temporaryMaxCounts = { 20, 0, 0, };
         foreach (var prefab in PrefabsToManage) 
         {
             SpawnedObjectMap.Add(index, new List<GameObject>());

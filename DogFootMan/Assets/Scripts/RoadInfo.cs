@@ -36,40 +36,20 @@ public class RoadInfo : MonoBehaviour
         //Gizmos.DrawWireCube(Vector3.zero, Vector3.one);
     }
 
-    public Vector3 GetCenterOfLanePosition(int lane, Vector3 currentPositionOfRunningObject)
-    {
-        var result = GetCenterOfLanePosition(lane, new Vector2(currentPositionOfRunningObject.x, currentPositionOfRunningObject.z));
-        return new Vector3(result.x, currentPositionOfRunningObject.y, result.y);
-    }
-
-    Vector2 GetCenterOfLanePosition(int lane, Vector2 currentPositionOfRunningObject)
-    {
-        Vector2 myPosition = new Vector2(gameObject.transform.position.x, gameObject.transform.position.z);
-        currentPositionOfRunningObject -= myPosition;
-
-        Quaternion inverseRotation = Quaternion.Euler(0f, 0f, gameObject.transform.rotation.eulerAngles.y);
-        currentPositionOfRunningObject = inverseRotation * currentPositionOfRunningObject;
-
-        var boxCollider = gameObject.GetComponent<BoxCollider>();
-        float laneWidth = boxCollider.size.x * gameObject.transform.localScale.x / (ForwardLaneCount + BackwardLaneCount);
-        float centerOfLane = laneWidth * lane - (lane > 0 ? 1 : -1) * laneWidth / 2;
-        currentPositionOfRunningObject.x = centerOfLane;
-
-        currentPositionOfRunningObject = Quaternion.Euler(0f, 0f, -gameObject.transform.rotation.eulerAngles.y) * currentPositionOfRunningObject;
-        return currentPositionOfRunningObject += myPosition;
-    }
+    // if you need to get function to get lane offset from current position
+    // use right vector of road gameobject transform
 
     // TODO it should be cached
     public Vector3 GetDestinationOfLane(int lane)
     {
-        var destination = GetDestinationOfLaneImpl(lane);
+        var destination = GetDestinationOfLaneImpl(lane, false);
         return new Vector3(destination.x, 20f, destination.y);
     }
 
-    Vector2 GetDestinationOfLaneImpl(int lane)
+    Vector2 GetDestinationOfLaneImpl(int lane, bool bIsStartingPoint)
     {
         var boxCollider = GetComponent<BoxCollider>();
-        var halfSizeZ = boxCollider.size.z * gameObject.transform.localScale.z / 2;
+        var halfSizeZ = (bIsStartingPoint ? -1 : 1 ) * boxCollider.size.z * gameObject.transform.localScale.z / 2;
         float laneWidth = boxCollider.size.x * gameObject.transform.localScale.x / (ForwardLaneCount + BackwardLaneCount);
         float centerOfLane = laneWidth * lane - (lane > 0 ? 1 : -1) * laneWidth / 2;
         Vector2 destination = new Vector2(centerOfLane, lane > 0 ? halfSizeZ : -halfSizeZ);
@@ -82,16 +62,7 @@ public class RoadInfo : MonoBehaviour
     // TODO it should be cached
     public Vector3 GetStartingPointOfLane(int lane)
     {
-        var boxCollider = GetComponent<BoxCollider>();
-        var halfSizeZ = boxCollider.size.z * gameObject.transform.localScale.z / 2;
-        halfSizeZ *= 0.9f;
-        float laneWidth = boxCollider.size.x * gameObject.transform.localScale.x / (ForwardLaneCount + BackwardLaneCount);
-        float centerOfLane = laneWidth * lane - (lane > 0 ? 1 : -1) * laneWidth / 2;
-        Vector2 destination = new Vector2(centerOfLane, lane > 0 ? -halfSizeZ : halfSizeZ);
-
-        destination = Quaternion.Euler(0f, 0f, -gameObject.transform.rotation.eulerAngles.y) * destination;
-        destination += new Vector2(gameObject.transform.position.x, gameObject.transform.position.z);
-
+        var destination = GetDestinationOfLaneImpl(lane, true);
         return new Vector3(destination.x, 20f, destination.y);
     }
 
