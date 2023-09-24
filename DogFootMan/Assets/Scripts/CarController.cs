@@ -84,7 +84,7 @@ public class CarController : MonoBehaviour
         }
         public void Brake()
         {
-            if (Car.RigidBody.velocity.magnitude > 10.0f)
+            if (Car.RigidBody.velocity.magnitude > 1.0f)
             {
                 const float Power = 20000f;
                 Car.RigidBody.AddForce(-Car.RigidBody.velocity.normalized * Time.deltaTime * Power, ForceMode.Acceleration);
@@ -112,6 +112,7 @@ public class CarController : MonoBehaviour
         {
             MakeDestination();
             inCar.RotatorForThisCar = new CarRotator(inCar, GetDestination());
+            Debug.Log(string.Format("AlongTheRoad {0}", GetDestination()));
         }
 
         public override void Move()
@@ -135,7 +136,6 @@ public class CarController : MonoBehaviour
         bool bIsWaiting;
         public CarMoverUnderTheTraffic(CarController inCar) : base(inCar)
         {
-
         }
 
         public override void Move()
@@ -146,6 +146,12 @@ public class CarController : MonoBehaviour
             }
             else
             {
+                var remainingDistance = GetDestination() - Car.transform.position;
+                if (remainingDistance.magnitude < 5)
+                {
+                    Car.LeaveTraffic();
+                    return;
+                }
                 Accelerate();
             }
         }
@@ -193,10 +199,10 @@ public class CarController : MonoBehaviour
         if(newRoad && newRoad != CurrentRoad)
         {
             CurrentRoad = newRoad;
-            (MoverForThisCar as CarMoverAlongTheRoad)?.MakeDestination();
+            if(MoverForThisCar as CarMoverUnderTheTraffic == null)
+                MoverForThisCar = new CarMoverAlongTheRoad(this);
         }
     }
-
     public void SetTraffic(bool bIsSet)
     {
         if(bIsSet)
@@ -209,6 +215,12 @@ public class CarController : MonoBehaviour
         }
     }
 
+    public void LeaveTraffic()
+    {
+        MoverForThisCar = new CarMoverAlongTheRoad(this);
+        MoverForThisCar.MakeDestination();
+        Debug.Log(string.Format("Reach goal and set new goal {0}", MoverForThisCar.GetDestination()));
+    }
     bool IsForwardDirectionInRotatedRectangle()
     {
         var boxCollider = CurrentRoad.GetComponent<BoxCollider>();
@@ -235,5 +247,6 @@ public class CarController : MonoBehaviour
     {
         (MoverForThisCar as CarMoverUnderTheTraffic).SetDestination(destination);
         RotatorForThisCar = new CarRotator(this, destination);
+        Debug.Log(string.Format("UnderTheTraffic {0}", MoverForThisCar.GetDestination()));
     }
 }
