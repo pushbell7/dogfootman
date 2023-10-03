@@ -16,33 +16,61 @@ public class TrafficControlTrigger : MonoBehaviour
         var boxCollider = GetComponent<BoxCollider>();
         var halfSizeX = boxCollider.size.x * transform.localScale.x / 2;
         var halfSizeZ = boxCollider.size.z * transform.localScale.z / 2;
-        Edges[0] = transform.rotation * (new Vector3(-halfSizeX, 0, -halfSizeZ));
-        Edges[1] = transform.rotation * (new Vector3(halfSizeX, 0, -halfSizeZ));
-        Edges[2] = transform.rotation * (new Vector3(-halfSizeX, 0, halfSizeZ));
-        Edges[3] = transform.rotation * (new Vector3(halfSizeX, 0, halfSizeZ));
+        Edges[0] = transform.position + transform.rotation * (new Vector3(-halfSizeX, 0, -halfSizeZ));
+        Edges[1] = transform.position + transform.rotation * (new Vector3(halfSizeX, 0, -halfSizeZ));
+        Edges[2] = transform.position + transform.rotation * (new Vector3(halfSizeX, 0, halfSizeZ));
+        Edges[3] = transform.position + transform.rotation * (new Vector3(-halfSizeX, 0, halfSizeZ));
     }
 
-    Vector3 GetPointInSpan(Vector3 target)
+    Vector3 GetPointInSpan(Vector3 target, Vector3 forward)
     {
         int count = Edges.Length;
         for (int i = 0; i < count; ++i)
         {
             Vector3 edge1 = Edges[i % count];
             Vector3 edge2 = Edges[(i + 1) % count];
-            float ratio = GetRatioOnSpan(edge1, edge2, target);
-            if (0 <= ratio && ratio <= 1)
+            var intersectionPoint = GetIntersectionPoint(edge1, edge2, target, target + forward);
+
+            if(IsInSpan(edge1, edge2, intersectionPoint) && IsSameDirection(forward, intersectionPoint - target))
             {
-                return transform.position + edge1 + ratio * (edge2 - edge1);
+                return intersectionPoint;
             }
         }
         return transform.position;
     }
-    float GetRatioOnSpan(Vector3 span1, Vector3 span2, Vector3 target)
+    bool IsSameDirection(Vector3 direction1, Vector3 direction2)
     {
-        Vector3 v1 = span2 - span1;
-        Vector3 v2 = target - span1;
+        return Vector3.Dot(direction1, direction2) > 0;
+    }
+    bool IsInSpan(Vector3 spanVector1, Vector3 spanVector2, Vector3 pointToCheck)
+    {
+        Vector3 dir1 = spanVector2 - pointToCheck;
+        Vector3 dir2 = spanVector1 - pointToCheck;
 
-        return Vector3.Dot(v2, v1) / Vector3.Dot(v1, v1);
+        return Vector3.Dot(dir1, dir2) < 0;
+    }
+
+    Vector3 GetIntersectionPoint(Vector3 p1, Vector3 p2, Vector3 q1, Vector3 q2)
+    {
+        Vector3 d1 = p2 - p1;
+        Vector3 d2 = q2 - q1;
+
+        Vector3 n = Vector3.Cross(d1, d2);
+
+        if(n.sqrMagnitude < float.Epsilon)
+        {
+            return Vector3.zero;
+        }
+        var newNormal1 = Vector3.Cross(q1 - p1, d2);
+        float t = Vector3.Dot(newNormal1, n) / Vector3.Dot(n, n);
+        Vector3 result1 = p1 + t * d1;
+
+        // to check if result1 == result2
+        //var newNormal2 = Vector3.Cross(q1 - p1, d1);
+        //float s = Vector3.Dot(newNormal2, n) / Vector3.Dot(n, n);
+        //Vector3 result2 = q1 + s * d2;
+
+        return result1;
     }
 
     // Start is called before the first frame update
@@ -79,7 +107,7 @@ public class TrafficControlTrigger : MonoBehaviour
                 if (RoadInfo.IsInRotatedRectangle(roadInfo.GetStartingPointOfLane(i), transform.position, size / 2, transform.rotation.eulerAngles.y))
                 {
                     var startingPoint = roadInfo.GetStartingPointOfLane(i);
-                    candidatePoint.Add(GetPointInSpan(startingPoint - transform.position + roadInfo.transform.forward * 10));
+                    candidatePoint.Add(GetPointInSpan(startingPoint, road.transform.forward));
                 }
             }
             for(int i = -1; i >= -roadInfo.BackwardLaneCount; --i)
@@ -87,7 +115,7 @@ public class TrafficControlTrigger : MonoBehaviour
                 if (RoadInfo.IsInRotatedRectangle(roadInfo.GetStartingPointOfLane(i), transform.position, size / 2, transform.rotation.eulerAngles.y))
                 {
                     var startingPoint = roadInfo.GetStartingPointOfLane(i);
-                    candidatePoint.Add(GetPointInSpan(startingPoint - transform.position - roadInfo.transform.forward * 10));
+                    candidatePoint.Add(GetPointInSpan(startingPoint, -road.transform.forward));
                 }
             }
 
@@ -98,6 +126,13 @@ public class TrafficControlTrigger : MonoBehaviour
     {
         Gizmos.color = Color.blue;
 
+        int count = Edges.Length;
+        for (int i = 0; i < count; ++i)
+        {
+            Vector3 edge1 = Edges[i % count];
+            Vector3 edge2 = Edges[(i + 1) % count];
+            Gizmos.DrawLine(edge1, edge2);
+        }
         //var collider = GetComponent<BoxCollider>();
         //Vector3 size = new Vector3(collider.size.x * transform.localScale.x, collider.size.y * transform.localScale.y, collider.size.z * transform.localScale.z);
         //Vector3 position = transform.position;
