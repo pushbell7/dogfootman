@@ -152,13 +152,17 @@ public class TrafficControlTrigger : MonoBehaviour
 
     private void Update()
     {
-        const float INTERVAL = 5;
+        const float INTERVAL = 10;
         CurrentTrafficIndex = (int)(Time.time / INTERVAL) % WaitingObjectUnderControl.Count;
 
         int index = 0;
-        foreach(var waitingList in WaitingObjectUnderControl)
+        foreach (var waitingList in WaitingObjectUnderControl)
         {
-            waitingList.Value.ForEach(obj => obj.GetComponent<CarController>()?.SetWait(index == CurrentTrafficIndex));
+            waitingList.Value.ForEach(obj => obj.GetComponent<CarController>()?.SetWait(index != CurrentTrafficIndex));
+            if (index == CurrentTrafficIndex)
+            {
+                waitingList.Value.Clear();
+            }
             index++;
         }
     }
@@ -227,9 +231,9 @@ public class TrafficControlTrigger : MonoBehaviour
         {
             var leftRoads = ConnectedRoads.FindAll(param => { return param != rightestRoad && param != currentRoad; });
             int randomIndex = Random.Range(0, leftRoads.Count);
-            if(leftRoads.Count <= randomIndex)
+            if(leftRoads.Count == 0)
             {
-                Debug.Log(string.Format("{0} : count:{1}", currentRoad.name, leftRoads.Count));
+                leftRoads = ConnectedRoads.FindAll(param => { return param != currentRoad; });
             }
             var targetRoad = leftRoads[randomIndex];
             return CandidatePointMap[targetRoad].Find(param => { return true; });
