@@ -210,7 +210,7 @@ GameObject:
   - component: {fileID: 2112597}
   - component: {fileID: 2112599}
   - component: {fileID: 2112600}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (16)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -1132,7 +1132,7 @@ GameObject:
   - component: {fileID: 107833026}
   - component: {fileID: 107833028}
   - component: {fileID: 107833029}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -1269,9 +1269,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PrefabsToManage:
-  - {fileID: 2843767631181884760, guid: a4a8988061c9cc7408094d67f26dfb7e, type: 3}
-  - {fileID: 3567042043470505174, guid: 369cc4f3a351f8c469d57b3857cd2529, type: 3}
-  - {fileID: 3565694508969303796, guid: dcf0c8156903e4a42a1bb4ca4b2403a9, type: 3}
+  - Key: 0
+    Name: Car
+    Prefab: {fileID: 2843767631181884760, guid: a4a8988061c9cc7408094d67f26dfb7e, type: 3}
+    MaxCountToMake: 20
+  - Key: 1
+    Name: Human
+    Prefab: {fileID: 3567042043470505174, guid: 369cc4f3a351f8c469d57b3857cd2529, type: 3}
+    MaxCountToMake: 10
+  - Key: 2
+    Name: SomethingToRide
+    Prefab: {fileID: 3565694508969303796, guid: dcf0c8156903e4a42a1bb4ca4b2403a9, type: 3}
+    MaxCountToMake: 1
   CenterObjectToManage: {fileID: 1981343144}
 --- !u!4 &113491287
 Transform:
@@ -1523,7 +1532,7 @@ GameObject:
   - component: {fileID: 180094125}
   - component: {fileID: 180094127}
   - component: {fileID: 180094128}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (1)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -2320,7 +2329,7 @@ GameObject:
   - component: {fileID: 251515826}
   - component: {fileID: 251515828}
   - component: {fileID: 251515829}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (24)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -2588,7 +2597,7 @@ GameObject:
   - component: {fileID: 266368876}
   - component: {fileID: 266368875}
   - component: {fileID: 266368874}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (34)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -3370,7 +3379,7 @@ GameObject:
   - component: {fileID: 345586237}
   - component: {fileID: 345586239}
   - component: {fileID: 345586240}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (27)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -3556,7 +3565,7 @@ GameObject:
   - component: {fileID: 351068145}
   - component: {fileID: 351068147}
   - component: {fileID: 351068148}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (30)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -4354,7 +4363,7 @@ GameObject:
   - component: {fileID: 451982844}
   - component: {fileID: 451982846}
   - component: {fileID: 451982847}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (11)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -4548,7 +4557,7 @@ GameObject:
   - component: {fileID: 462740098}
   - component: {fileID: 462740100}
   - component: {fileID: 462740101}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (25)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -5080,7 +5089,7 @@ GameObject:
   - component: {fileID: 533203321}
   - component: {fileID: 533203320}
   - component: {fileID: 533203319}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (36)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -6620,7 +6629,7 @@ GameObject:
   - component: {fileID: 685535489}
   - component: {fileID: 685535491}
   - component: {fileID: 685535492}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (5)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -6740,7 +6749,7 @@ GameObject:
   - component: {fileID: 691847132}
   - component: {fileID: 691847134}
   - component: {fileID: 691847135}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (7)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -6860,7 +6869,7 @@ GameObject:
   - component: {fileID: 702489021}
   - component: {fileID: 702489020}
   - component: {fileID: 702489019}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (35)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -6980,7 +6989,7 @@ GameObject:
   - component: {fileID: 706395167}
   - component: {fileID: 706395169}
   - component: {fileID: 706395170}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (15)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -7454,7 +7463,7 @@ GameObject:
   - component: {fileID: 741798700}
   - component: {fileID: 741798702}
   - component: {fileID: 741798703}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (10)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -7574,7 +7583,7 @@ GameObject:
   - component: {fileID: 753911818}
   - component: {fileID: 753911820}
   - component: {fileID: 753911821}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (20)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -8286,7 +8295,7 @@ GameObject:
   - component: {fileID: 818841630}
   - component: {fileID: 818841629}
   - component: {fileID: 818841628}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (33)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -8406,7 +8415,7 @@ GameObject:
   - component: {fileID: 821009891}
   - component: {fileID: 821009890}
   - component: {fileID: 821009889}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (37)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -8674,7 +8683,7 @@ GameObject:
   - component: {fileID: 839429743}
   - component: {fileID: 839429745}
   - component: {fileID: 839429746}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (6)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -9222,7 +9231,7 @@ GameObject:
   - component: {fileID: 902372110}
   - component: {fileID: 902372112}
   - component: {fileID: 902372113}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (29)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -9476,7 +9485,7 @@ GameObject:
   - component: {fileID: 914135957}
   - component: {fileID: 914135959}
   - component: {fileID: 914135960}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (8)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -9596,7 +9605,7 @@ GameObject:
   - component: {fileID: 916485258}
   - component: {fileID: 916485260}
   - component: {fileID: 916485261}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (3)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -10218,7 +10227,7 @@ GameObject:
   - component: {fileID: 1016250461}
   - component: {fileID: 1016250463}
   - component: {fileID: 1016250464}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (19)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -11194,7 +11203,7 @@ GameObject:
   - component: {fileID: 1093453812}
   - component: {fileID: 1093453814}
   - component: {fileID: 1093453815}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (2)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -11707,7 +11716,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 484, y: 20, z: 311.1}
-  m_LocalScale: {x: 1.5, y: 1, z: 1.5}
+  m_LocalScale: {x: 1.2, y: 1, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 904239225}
@@ -13259,7 +13268,7 @@ GameObject:
   - component: {fileID: 1290734241}
   - component: {fileID: 1290734243}
   - component: {fileID: 1290734244}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (21)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -13947,7 +13956,7 @@ GameObject:
   - component: {fileID: 1390242305}
   - component: {fileID: 1390242307}
   - component: {fileID: 1390242308}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (17)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -14289,7 +14298,7 @@ GameObject:
   - component: {fileID: 1399349411}
   - component: {fileID: 1399349413}
   - component: {fileID: 1399349414}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (23)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -15565,7 +15574,7 @@ GameObject:
   - component: {fileID: 1553482204}
   - component: {fileID: 1553482203}
   - component: {fileID: 1553482202}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (32)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -15907,7 +15916,7 @@ GameObject:
   - component: {fileID: 1570602414}
   - component: {fileID: 1570602416}
   - component: {fileID: 1570602417}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (14)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -16689,7 +16698,7 @@ GameObject:
   - component: {fileID: 1689681282}
   - component: {fileID: 1689681284}
   - component: {fileID: 1689681285}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (13)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -16809,7 +16818,7 @@ GameObject:
   - component: {fileID: 1698876630}
   - component: {fileID: 1698876632}
   - component: {fileID: 1698876633}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (31)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -16929,7 +16938,7 @@ GameObject:
   - component: {fileID: 1702170394}
   - component: {fileID: 1702170396}
   - component: {fileID: 1702170397}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (12)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -17271,7 +17280,7 @@ GameObject:
   - component: {fileID: 1716659283}
   - component: {fileID: 1716659285}
   - component: {fileID: 1716659286}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (18)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -17465,7 +17474,7 @@ GameObject:
   - component: {fileID: 1727562987}
   - component: {fileID: 1727562989}
   - component: {fileID: 1727562990}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (26)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -17659,7 +17668,7 @@ GameObject:
   - component: {fileID: 1733187159}
   - component: {fileID: 1733187161}
   - component: {fileID: 1733187162}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (28)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -18947,7 +18956,7 @@ GameObject:
   - component: {fileID: 1897230820}
   - component: {fileID: 1897230822}
   - component: {fileID: 1897230823}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (22)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -20342,7 +20351,7 @@ GameObject:
   - component: {fileID: 2058280575}
   - component: {fileID: 2058280577}
   - component: {fileID: 2058280578}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (4)
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -20462,7 +20471,7 @@ GameObject:
   - component: {fileID: 2067541592}
   - component: {fileID: 2067541594}
   - component: {fileID: 2067541595}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (9)
   m_TagString: Road
   m_Icon: {fileID: 0}

@@ -2,16 +2,33 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+[System.Serializable]
+public class PrefabToManage
+{
+    public int Key;
+    public string Name;
+    public GameObject Prefab;
+    public int MaxCountToMake;
+    private int CurrentCount;
+
+    static int DEFAULT_KEY = 0;
+    public PrefabToManage()
+    {
+        Key = DEFAULT_KEY++;
+    }
+
+    public int GetCurrentCount() { return CurrentCount; }
+    public void IncreaseCurrentCount() { CurrentCount++; }
+    public void DecreaseCurrentCount() { CurrentCount--; }
+}
+
 public class ObjectManager : MonoBehaviour
 {
-    // can i link fields together for customization purpose?
-    // like Prefabs matched with maximum count to control and spawning position
-    public List<GameObject> PrefabsToManage; // car, human, something
+    public List<PrefabToManage> PrefabsToManage;
     public GameObject CenterObjectToManage;
 
     private Dictionary<int, List<GameObject>> SpawnedObjectMap;
-    private Dictionary<int, int> MaxCountForObjectMap;
-    private Dictionary<int, int> CurrentIndexMap;
 
     private List<GameObject> BatchedRoads;
 
@@ -24,17 +41,11 @@ public class ObjectManager : MonoBehaviour
     void Start()
     {
         SpawnedObjectMap = new Dictionary<int, List<GameObject>>();
-        MaxCountForObjectMap = new Dictionary<int, int>();
-        CurrentIndexMap = new Dictionary<int, int>();
 
         int index = 0;
-        int[] temporaryMaxCounts = { 20, 0, 0, };
         foreach (var prefab in PrefabsToManage) 
         {
-            SpawnedObjectMap.Add(index, new List<GameObject>());
-            MaxCountForObjectMap.Add(index, temporaryMaxCounts[index]);
-            CurrentIndexMap.Add(index, 0);
-            index++;
+            SpawnedObjectMap.Add(index++, new List<GameObject>());
         }
 
         BatchedRoads = new List<GameObject>(GameObject.FindGameObjectsWithTag("Road"));
@@ -72,35 +83,66 @@ public class ObjectManager : MonoBehaviour
 
     void SpawnObjects()
     {
-        string[] temporaryName = { "car", "human", "item" };
-        int index = 0;
         foreach (var spawnedObjects in SpawnedObjectMap)
         {
-            string curruentName = temporaryName[index];
-            while (spawnedObjects.Value.Count < MaxCountForObjectMap[spawnedObjects.Key])
+            var CurrentPrefab = PrefabsToManage[spawnedObjects.Key];
+            while (spawnedObjects.Value.Count < CurrentPrefab.MaxCountToMake)
             {
-                GameObject spawnedObject = Instantiate(PrefabsToManage[spawnedObjects.Key]);
-                spawnedObject.transform.position = GeneratePosition(spawnedObject);
-
-                int indexOfCurrentType = CurrentIndexMap[index];
-                spawnedObject.name = string.Format("{0}{1}", curruentName, indexOfCurrentType);
-                CurrentIndexMap[index] = ++indexOfCurrentType;
-
+                GameObject spawnedObject = Instantiate(CurrentPrefab.Prefab);
+                spawnedObject.name = string.Format("{0}{1}", CurrentPrefab.Name, CurrentPrefab.GetCurrentCount());
                 spawnedObject.tag = "Obstacles";
 
+                if (CurrentPrefab.Name.Equals("Car"))
+                {
+                    spawnedObject.transform.position = GeneratePositionOnRoad(spawnedObject);
+                }
+                else
+                {
+                    spawnedObject.transform.position = GeneratePositionOutOfRoad(spawnedObject);
+                }
+                CurrentPrefab.IncreaseCurrentCount();
                 spawnedObjects.Value.Add(spawnedObject);
             }
-            index++;
         }
     }
 
-    Vector3 GeneratePosition(GameObject spawnedObject)
+    Vector3 GeneratePositionOnRoad(GameObject spawnedObject)
+    {
+        return MoveOnTheRoad(GenerateRandomPosition(spawnedObject));
+    }
+    Vector3 GeneratePositionOutOfRoad(GameObject spawnedObject)
+    {
+        var positionToSpawn = GenerateRandomPosition(spawnedObject);
+        var currentRoad = FindRoadOn(positionToSpawn);
+        if(currentRoad != null)
+        {
+            var boxCollider = currentRoad.GetComponent<BoxCollider>();
+            float xScale = boxCollider.size.x * currentRoad.transform.localScale.x / 2;
+            var diff = positionToSpawn - currentRoad.transform.position;
+            Vector3 newPosition = Vector3.zero;
+            if (Vector3.Dot(diff, currentRoad.transform.right) < 0)
+            {
+                newPosition = positionToSpawn - currentRoad.transform.right * xScale;
+            }
+            else
+            {
+                newPosition = positionToSpawn + currentRoad.transform.right * xScale;
+            }
+            if(IsOnRoad(newPosition))
+            {
+                return GeneratePositionOutOfRoad(spawnedObject);
+            }
+            return newPosition;
+        }
+        return positionToSpawn;
+    }
+
+    Vector3 GenerateRandomPosition(GameObject spawnedObject)
     {
         Vector3 direction = new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized;
         int size = Random.Range(25, 75);
-        Vector3 positionToSpawn = MoveOnTheRoad(CenterObjectToManage.transform.position + (direction * size));
+        var positionToSpawn = CenterObjectToManage.transform.position + (direction * size);
         positionToSpawn.y = Terrain.activeTerrain.SampleHeight(positionToSpawn) + (spawnedObject.GetComponent<Collider>().bounds.size.y / 2);
-
         return positionToSpawn;
     }
 
@@ -108,7 +150,6 @@ public class ObjectManager : MonoBehaviour
     {
         float minimum = float.MaxValue;
         Vector3 candidate = Vector3.zero;
-        //string nameOfBoundsForDebugging = "";
         foreach(var road in BatchedRoads)
         {
             var boxCollider = road.GetComponent<BoxCollider>();
@@ -117,17 +158,14 @@ public class ObjectManager : MonoBehaviour
             float zScale = boxCollider.size.z * road.transform.localScale.z / 2;
 
             Vector2 tempNearestPoint = GetNearestPointOnRectangle(new Vector2(originPosition.x, originPosition.z), new Vector2(center.x, center.z), new Vector2(xScale, zScale), road.transform.rotation.eulerAngles.y);
-            Vector3 nearestPoint = new Vector3(tempNearestPoint.x, 20, tempNearestPoint.y);
+            Vector3 nearestPoint = new Vector3(tempNearestPoint.x, originPosition.y, tempNearestPoint.y);
             float distance = (nearestPoint - originPosition).magnitude;
             if(distance < minimum)
             {
                 candidate = nearestPoint;
                 minimum = distance;
-                //nameOfBoundsForDebugging = road.name;
-
             }
         }
-        //Debug.DrawLine(originPosition, candidate, Color.green, 60.0f);
         return candidate;
     }
 
@@ -199,13 +237,12 @@ public class ObjectManager : MonoBehaviour
 
     public GameObject FindRoadOn(Vector3 positionToCheck)
     {
-        foreach(var road in BatchedRoads)
+        var ray = new Ray(positionToCheck, new Vector3(0f, -1f, 0f));
+        const float SafeDistance = 10.0f;
+        RaycastHit hitResult;        ;
+        if (Physics.Raycast(ray, out hitResult, SafeDistance, LayerMask.GetMask("Road")))
         {
-            var roadInfo = road.GetComponent<RoadInfo>();
-            if (roadInfo.IsRoadOn(positionToCheck))
-            {
-                return road;
-            }
+            return hitResult.collider.gameObject;
         }
         return null;
     }
