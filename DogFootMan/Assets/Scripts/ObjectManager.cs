@@ -76,6 +76,8 @@ public class ObjectManager : MonoBehaviour
                 {
                     spawnedObjects.Value.RemoveAt(i);
                     Destroy(element);
+                    var CurrentPrefab = PrefabsToManage[spawnedObjects.Key];
+                    CurrentPrefab.DecreaseCurrentCount();
                 }
             }
         }
@@ -239,7 +241,7 @@ public class ObjectManager : MonoBehaviour
     {
         var ray = new Ray(positionToCheck, new Vector3(0f, -1f, 0f));
         const float SafeDistance = 10.0f;
-        RaycastHit hitResult;        ;
+        RaycastHit hitResult;
         if (Physics.Raycast(ray, out hitResult, SafeDistance, LayerMask.GetMask("Road")))
         {
             return hitResult.collider.gameObject;
