@@ -5,6 +5,7 @@ using UnityEngine;
 public class CarController : MonoBehaviour
 {
     Rigidbody RigidBody;
+    private AbilityContainer MyAbility;
     GameObject CurrentRoad;
     public int LaneToUse;
 
@@ -74,12 +75,10 @@ public class CarController : MonoBehaviour
             {
                 Car.RotatorForThisCar.Rotate();
             }
-            const float Power = 10000f; // it should be managed in MyCharacter ability container
             
-            Car.RigidBody.AddForce(Car.transform.forward * Time.deltaTime * Power, ForceMode.Acceleration);
+            Car.RigidBody.AddForce(Car.transform.forward * Time.deltaTime * Car.MyAbility.GetPower(), ForceMode.Acceleration);
 
-            const float MaxSpeed = 10f;
-            Car.RigidBody.velocity = Vector3.ClampMagnitude(Car.RigidBody.velocity, MaxSpeed);
+            Car.RigidBody.velocity = Vector3.ClampMagnitude(Car.RigidBody.velocity, Car.MyAbility.GetMaxSpeed());
 
         }
         public void Brake()
@@ -180,6 +179,7 @@ public class CarController : MonoBehaviour
     void Start()
     {
         RigidBody = GetComponent<Rigidbody>();
+        MyAbility = GetComponent<AbilityContainer>();
 
         CurrentRoad = ObjectManager.Get().FindRoadOn(gameObject.transform.position);
         if(CurrentRoad == null)

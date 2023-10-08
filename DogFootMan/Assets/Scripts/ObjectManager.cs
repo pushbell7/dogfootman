@@ -249,4 +249,9 @@ public class ObjectManager : MonoBehaviour
         return null;
     }
 
+    public bool IsMyCharacter(GameObject other)
+    {
+        return other == CenterObjectToManage;
+    }
+
 }

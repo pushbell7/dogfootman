@@ -14,6 +14,7 @@ public class HumanController : MonoBehaviour
     float TargetTimeToWait;
     Vector3 ObjectivePosition;
     Rigidbody RigidBody;
+    AbilityContainer MyAbility;
 
     float MinTimeToWait = 0.3f;
     float MaxTimeToWait = 2.0f;
@@ -24,6 +25,7 @@ public class HumanController : MonoBehaviour
     void Start()
     {
         RigidBody = GetComponent<Rigidbody>();
+        MyAbility = GetComponent<AbilityContainer>();
         SetWait();
     }
 
@@ -98,12 +100,10 @@ public class HumanController : MonoBehaviour
             return;
         }
 
-        const float POWER = 1000.0f;
         var forceDirection = (ObjectivePosition - transform.position).normalized;
-        RigidBody.AddForce(forceDirection * Time.deltaTime * POWER, ForceMode.Acceleration);
+        RigidBody.AddForce(forceDirection * Time.deltaTime * MyAbility.GetPower(), ForceMode.Acceleration);
 
-        const float MaxSpeed = 5f;
-        RigidBody.velocity = Vector3.ClampMagnitude(RigidBody.velocity, MaxSpeed);
+        RigidBody.velocity = Vector3.ClampMagnitude(RigidBody.velocity, MyAbility.GetMaxSpeed());
     }
 
     bool IsReached()

@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 1013457763584490578}
   - component: {fileID: 568734520957870133}
   - component: {fileID: 4009612864040198544}
+  - component: {fileID: 8981842179800359063}
   m_Layer: 0
   m_Name: Car
   m_TagString: Untagged
@@ -147,4 +148,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LaneToUse: 0
-  CurrentLane: 0
+--- !u!114 &8981842179800359063
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2843767631181884760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df8dc12dd496e364aa3204950f42dbd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
