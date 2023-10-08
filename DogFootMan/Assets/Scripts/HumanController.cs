@@ -15,6 +15,11 @@ public class HumanController : MonoBehaviour
     Vector3 ObjectivePosition;
     Rigidbody RigidBody;
 
+    float MinTimeToWait = 0.3f;
+    float MaxTimeToWait = 2.0f;
+    float MaxDistanceToMove = 30.0f;
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -61,14 +66,13 @@ public class HumanController : MonoBehaviour
     void SetWait()
     {
         CurrentState = State.WAIT;
-        TargetTimeToWait = Time.time + Random.Range(0.5f, 5.0f);
+        TargetTimeToWait = Time.time + Random.Range(MinTimeToWait, MaxTimeToWait);
     }
 
     void SetFindDestination()
     {
         CurrentState = State.FIND_DESTINATION;
-        ObjectivePosition = MakeRandomPosition(20.0f);
-        Debug.Log(string.Format("{0}{1}", name, ObjectivePosition));
+        ObjectivePosition = MakeRandomPosition();
     }
 
     bool IsObjectivePositionReachable()
@@ -83,6 +87,17 @@ public class HumanController : MonoBehaviour
 
     void MoveTo()
     {
+        var ray = new Ray(transform.position, ObjectivePosition - transform.position);
+        const float SafeDistance = 3.0f;
+        RaycastHit hitResult;
+        Physics.SphereCast(ray, 0.5f, out hitResult, SafeDistance);
+        Debug.DrawRay(transform.position, ObjectivePosition - transform.position, Color.black);
+        if ((hitResult.collider && hitResult.collider.tag == "Obstacles"))
+        {
+            SetFindDestination();
+            return;
+        }
+
         const float POWER = 1000.0f;
         var forceDirection = (ObjectivePosition - transform.position).normalized;
         RigidBody.AddForce(forceDirection * Time.deltaTime * POWER, ForceMode.Acceleration);
@@ -95,9 +110,9 @@ public class HumanController : MonoBehaviour
     {
         return (ObjectivePosition - transform.position).magnitude < 1.0f;
     }
-    Vector3 MakeRandomPosition(float distance)
+    Vector3 MakeRandomPosition()
     {
         var result = Quaternion.Euler(0, Random.Range(0, 360), 0) * transform.forward;
-        return transform.position + result * Random.Range(5, distance);
+        return transform.position + result * Random.Range(5, MaxDistanceToMove);
     }
 }
