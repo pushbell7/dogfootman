@@ -163,6 +163,14 @@ public class CarController : MonoBehaviour
         public void SetWait(bool bWait)
         {
             bIsWaiting = bWait;
+            if(bWait)
+            {
+                Car.RemoveRotator();
+            }
+            else
+            {
+                Car.SetDestination(GetDestination());
+            }
         }
     }
 
