@@ -1276,7 +1276,7 @@ MonoBehaviour:
   - Key: 1
     Name: Human
     Prefab: {fileID: 3567042043470505174, guid: 369cc4f3a351f8c469d57b3857cd2529, type: 3}
-    MaxCountToMake: 10
+    MaxCountToMake: 20
   - Key: 2
     Name: SomethingToRide
     Prefab: {fileID: 3565694508969303796, guid: dcf0c8156903e4a42a1bb4ca4b2403a9, type: 3}
@@ -9347,7 +9347,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 904239225}
-  - component: {fileID: 904239226}
   m_Layer: 0
   m_Name: TrafficControlPoints
   m_TagString: Untagged
@@ -9386,18 +9385,6 @@ Transform:
   - {fileID: 2134473117}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &904239226
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 904239224}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 68deaf0dc8ae24446b91880a264253b0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &913483818
 PrefabInstance:
   m_ObjectHideFlags: 0
