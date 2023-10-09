@@ -109,9 +109,12 @@ public class ObjectManager : MonoBehaviour
                 {
                     spawnedObject.transform.position = GeneratePositionOnRoad(spawnedObject);
                     var road = FindRoadOn(spawnedObject.transform.position);
-                    bool bIsForward = spawnedObject.GetComponent<CarController>().IsForwardDirectionInRotatedRectangle(road);
+                    if (road != null)
+                    {
+                        bool bIsForward = spawnedObject.GetComponent<CarController>().IsForwardDirectionInRotatedRectangle(road);
 
-                    spawnedObject.transform.rotation = Quaternion.LookRotation((bIsForward ? 1 : -1) * road.transform.forward);
+                        spawnedObject.transform.rotation = Quaternion.LookRotation((bIsForward ? 1 : -1) * road.transform.forward);
+                    }
                 }
                 else
                 {
