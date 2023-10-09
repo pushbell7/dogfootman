@@ -108,6 +108,10 @@ public class ObjectManager : MonoBehaviour
                 if (CurrentPrefab.Name.Equals("Car"))
                 {
                     spawnedObject.transform.position = GeneratePositionOnRoad(spawnedObject);
+                    var road = FindRoadOn(spawnedObject.transform.position);
+                    bool bIsForward = spawnedObject.GetComponent<CarController>().IsForwardDirectionInRotatedRectangle(road);
+
+                    spawnedObject.transform.rotation = Quaternion.LookRotation((bIsForward ? 1 : -1) * road.transform.forward);
                 }
                 else
                 {

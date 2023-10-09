@@ -49,9 +49,9 @@ public class AbilityContainer : MonoBehaviour
             public override Ability Make()
             {
                 var ability = new Ability();
-                ability.Power = 10000.0f;
+                ability.Power = 6000.0f;
                 ability.Mass = 20.0f;
-                ability.MaxSpeed = 10.0f;
+                ability.MaxSpeed = 20.0f;
                 ability.Life = 10;
                 return ability;
             }
@@ -62,7 +62,7 @@ public class AbilityContainer : MonoBehaviour
             public override Ability Make()
             {
                 var ability = new Ability();
-                ability.Power = 9000.0f;
+                ability.Power = 300.0f;
                 ability.Mass = 4.0f;
                 ability.MaxSpeed = 4.0f;
                 ability.Life = 0;

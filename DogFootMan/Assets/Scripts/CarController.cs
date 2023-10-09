@@ -31,7 +31,7 @@ public class CarController : MonoBehaviour
         public void Rotate()
         {
             float deltaTime = Time.time - TimeToStartRotation;
-            const float TIME_SCALE_TO_ROTATE = 1f;
+            const float TIME_SCALE_TO_ROTATE = 2.0f;
             Car.transform.rotation = Quaternion.Slerp(InitialRotation, TargetRotation, deltaTime * TIME_SCALE_TO_ROTATE);
 
             if (deltaTime * TIME_SCALE_TO_ROTATE > 1)
@@ -59,14 +59,17 @@ public class CarController : MonoBehaviour
         }
         public void MakeDestination()
         {
-            bool bIsForward = Car.IsForwardDirectionInRotatedRectangle();
-            DirectionOfMovement = Car.CurrentRoad.transform.forward * (bIsForward ? 1 : -1);
+            if (Car.CurrentRoad != null)
+            {
+            bool bIsForward = Car.IsForwardDirectionInRotatedRectangle(Car.CurrentRoad);
+                DirectionOfMovement = Car.CurrentRoad.transform.forward * (bIsForward ? 1 : -1);
 
-            var roadInfo = Car.CurrentRoad.GetComponent<RoadInfo>();
-            int maxCount = bIsForward ? roadInfo.ForwardLaneCount : roadInfo.BackwardLaneCount;
-            int LaneToUse = Random.Range(1, maxCount + 1) * (bIsForward ? 1 : -1);
+                var roadInfo = Car.CurrentRoad.GetComponent<RoadInfo>();
+                int maxCount = bIsForward ? roadInfo.ForwardLaneCount : roadInfo.BackwardLaneCount;
+                int LaneToUse = Random.Range(1, maxCount + 1) * (bIsForward ? 1 : -1);
 
-            DestinationInLane = roadInfo.GetDestinationOfLane(LaneToUse);
+                DestinationInLane = roadInfo.GetDestinationOfLane(LaneToUse);
+            }
         }
 
         public void Accelerate()
@@ -85,7 +88,7 @@ public class CarController : MonoBehaviour
         {
             if (Car.RigidBody.velocity.magnitude > 3.0f)
             {
-                const float Power = 20000f;
+                float Power = Car.MyAbility.GetPower() * 3;
                 Car.RigidBody.AddForce(-Car.RigidBody.velocity.normalized * Time.deltaTime * Power, ForceMode.Acceleration);
             }
             else
@@ -232,10 +235,12 @@ public class CarController : MonoBehaviour
         MoverForThisCar = new CarMoverAlongTheRoad(this);
         MoverForThisCar.MakeDestination();
     }
-    bool IsForwardDirectionInRotatedRectangle()
+    public bool IsForwardDirectionInRotatedRectangle(GameObject road)
     {
-        var boxCollider = CurrentRoad.GetComponent<BoxCollider>();
-        var center3D = CurrentRoad.transform.position + boxCollider.center;
+        if (road == null) return true;
+
+        var boxCollider = road.GetComponent<BoxCollider>();
+        var center3D = road.transform.position + boxCollider.center;
 
         // Translate the point to the rectangle's local coordinate space
         Vector2 point = new Vector2(gameObject.transform.position.x, gameObject.transform.position.z);
@@ -243,7 +248,7 @@ public class CarController : MonoBehaviour
         Vector2 translatedPoint = point - center;
 
         // Apply the inverse rotation of the rectangle to the translated point
-        Quaternion inverseRotation = Quaternion.Euler(0f, 0f, CurrentRoad.transform.rotation.eulerAngles.y);
+        Quaternion inverseRotation = Quaternion.Euler(0f, 0f, road.transform.rotation.eulerAngles.y);
         Vector2 rotatedPoint = inverseRotation * translatedPoint;
 
         return rotatedPoint.x > 0;
