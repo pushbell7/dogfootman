@@ -25,10 +25,18 @@ public class PrefabToManage
 
 public class ObjectManager : MonoBehaviour
 {
+    public enum ObjectType
+    {
+        Car,
+        Human,
+        ItemToRide,
+        MyCharacter,
+        None
+    }
     public List<PrefabToManage> PrefabsToManage;
     public GameObject CenterObjectToManage;
 
-    private Dictionary<int, List<GameObject>> SpawnedObjectMap;
+    private Dictionary<ObjectType, List<GameObject>> SpawnedObjectMap;
 
     private List<GameObject> BatchedRoads;
 
@@ -40,12 +48,12 @@ public class ObjectManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        SpawnedObjectMap = new Dictionary<int, List<GameObject>>();
+        SpawnedObjectMap = new Dictionary<ObjectType, List<GameObject>>();
 
         int index = 0;
         foreach (var prefab in PrefabsToManage) 
         {
-            SpawnedObjectMap.Add(index++, new List<GameObject>());
+            SpawnedObjectMap.Add((ObjectType)(index++), new List<GameObject>());
         }
 
         BatchedRoads = new List<GameObject>(GameObject.FindGameObjectsWithTag("Road"));
@@ -76,7 +84,7 @@ public class ObjectManager : MonoBehaviour
                 {
                     spawnedObjects.Value.RemoveAt(i);
                     Destroy(element);
-                    var CurrentPrefab = PrefabsToManage[spawnedObjects.Key];
+                    var CurrentPrefab = PrefabsToManage[(int)spawnedObjects.Key];
                     CurrentPrefab.DecreaseCurrentCount();
                 }
             }
@@ -87,7 +95,7 @@ public class ObjectManager : MonoBehaviour
     {
         foreach (var spawnedObjects in SpawnedObjectMap)
         {
-            var CurrentPrefab = PrefabsToManage[spawnedObjects.Key];
+            var CurrentPrefab = PrefabsToManage[(int)spawnedObjects.Key];
             while (spawnedObjects.Value.Count < CurrentPrefab.MaxCountToMake)
             {
                 GameObject spawnedObject = Instantiate(CurrentPrefab.Prefab);
@@ -254,4 +262,13 @@ public class ObjectManager : MonoBehaviour
         return other == CenterObjectToManage;
     }
 
+    public static ObjectType GetType(GameObject gameObjectToGet)
+    {
+        string name = gameObjectToGet.name;
+        if (name.Contains("Car")) { return ObjectType.Car; }
+        else if (name.Contains("Human")) { return ObjectType.Human; }
+        else if (name.Contains("MainCharacter")) { return ObjectType.MyCharacter; }
+        else if (name.Contains("ItemToRide")) { return ObjectType.ItemToRide; }
+        else { return ObjectType.None; }
+    }
 }
