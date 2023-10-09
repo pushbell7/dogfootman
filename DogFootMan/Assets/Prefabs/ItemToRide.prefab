@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 3257258700433157906}
   - component: {fileID: 4721266735632470026}
   m_Layer: 0
-  m_Name: SomethingToRide
+  m_Name: ItemToRide
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
