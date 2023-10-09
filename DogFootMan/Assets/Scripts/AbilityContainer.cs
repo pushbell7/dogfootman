@@ -47,12 +47,24 @@ public class AbilityContainer : MonoBehaviour
             }
         }
 
+        class KickboardFactory : BaseFactory
+        {
+            public override Ability Make()
+            {
+                var ability = new Ability();
+                ability.Power = 10000.0f;
+                ability.Mass = 5.0f;
+                ability.MaxSpeed = 8.0f;
+                return ability;
+            }
+        }
 
         public Ability Make(string type)
         {
             if (type.Contains("Car")) { return new CarFactory().Make(); }
             else if (type.Contains("Human")) { return new HumanFactory().Make(); }
             else if(type.Contains("MainCharacter")) { return new HumanFactory().Make(); }
+            else if (type.Contains("ItemToRide")) { return new KickboardFactory().Make(); }
             else { return new BaseFactory().Make(); }
         }
     }
@@ -88,6 +100,10 @@ public class AbilityContainer : MonoBehaviour
         MyAbility.MaxSpeed = newSpeed;
     }
 
+    public float GetMass()
+    {
+        return MyAbility.Mass;
+    }
     public void SetMass(float newMass)
     {
         MyAbility.Mass = newMass;

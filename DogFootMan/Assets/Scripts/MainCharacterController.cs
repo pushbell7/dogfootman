@@ -31,10 +31,11 @@ public class MainCharacterController : MonoBehaviour
 
     public void TakeVehicle(GameObject vehicle)
     {
-        // get ability from vehicle
+        var ability = vehicle.GetComponent<AbilityContainer>();
+        MyAbility.SetMass(ability.GetMass());
+        MyAbility.SetPower(ability.GetPower());
+        MyAbility.SetMaxSpeed(ability.GetMaxSpeed());
+
         // transform apperance
-        MyAbility.SetMass(5);
-        MyAbility.SetPower(10000);
-        MyAbility.SetMaxSpeed(10);
     }
 }
