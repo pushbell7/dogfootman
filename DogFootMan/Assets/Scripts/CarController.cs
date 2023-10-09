@@ -195,6 +195,9 @@ public class CarController : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        if (MoverForThisCar == null)
+            return;
+
         var ray = new Ray(transform.position, MoverForThisCar.GetDirection());
 
         const float SafeDistance = 15.0f;

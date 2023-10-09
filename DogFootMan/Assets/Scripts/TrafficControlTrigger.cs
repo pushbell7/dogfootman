@@ -158,7 +158,13 @@ public class TrafficControlTrigger : MonoBehaviour
         int index = 0;
         foreach (var waitingList in WaitingObjectUnderControl)
         {
-            waitingList.Value.ForEach(obj => obj.GetComponent<CarController>()?.SetWait(index != CurrentTrafficIndex));
+            waitingList.Value.ForEach(obj =>
+                {
+                    if (obj != null)
+                    {
+                        obj.GetComponent<CarController>()?.SetWait(index != CurrentTrafficIndex);
+                    }
+                });
             if (index == CurrentTrafficIndex)
             {
                 waitingList.Value.Clear();
