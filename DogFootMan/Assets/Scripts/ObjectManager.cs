@@ -66,7 +66,7 @@ public class ObjectManager : MonoBehaviour
     {
         if (CenterObjectToManage == null) return;
 
-        //DestroyObjects();
+        DestroyObjects();
         SpawnObjects();
     }
 
@@ -80,12 +80,15 @@ public class ObjectManager : MonoBehaviour
             for(int i = spawnedObjects.Value.Count - 1; i >=0; --i)
             {
                 var element = spawnedObjects.Value[i];
-                if (Vector3.Distance(element.transform.position, MainCharacterPosition) > DistanceToRemove)
+                if (element)
                 {
-                    spawnedObjects.Value.RemoveAt(i);
-                    Destroy(element);
-                    var CurrentPrefab = PrefabsToManage[(int)spawnedObjects.Key];
-                    CurrentPrefab.DecreaseCurrentCount();
+                    if (Vector3.Distance(element.transform.position, MainCharacterPosition) > DistanceToRemove)
+                    {
+                        spawnedObjects.Value.RemoveAt(i);
+                        Destroy(element);
+                        var CurrentPrefab = PrefabsToManage[(int)spawnedObjects.Key];
+                        CurrentPrefab.DecreaseCurrentCount();
+                    }
                 }
             }
         }
