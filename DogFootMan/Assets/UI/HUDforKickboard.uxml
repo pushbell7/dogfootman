@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement focusable="true" style="flex-grow: 0; left: 5px; top: 5px; width: 80px; height: 40px; background-color: rgb(141, 255, 0);">
+        <ui:Label tabindex="-1" text="Timer" parse-escape-sequences="true" display-tooltip-when-elided="true" name="TimerLabel" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 5px; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;" />
+        <ui:Label tabindex="-1" text="00:00" parse-escape-sequences="true" display-tooltip-when-elided="true" name="TimerTime" style="left: 0; right: 10px; align-self: flex-end; margin-top: 0; margin-right: 10px; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;" />
+    </ui:VisualElement>
+</ui:UXML>
