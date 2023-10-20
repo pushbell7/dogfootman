@@ -12,18 +12,35 @@ public class AbilityContainer : MonoBehaviour
         public float Mass;
         public float MaxSpeed;
         public int Life;
+        public EItemType Type;
 
         public void Add(Ability other)
         {
+            if (other == null) return;
+
             Power += other.Power;
             Mass += other.Mass;
             MaxSpeed += other.MaxSpeed;
             Life += other.Life;
         }
-    }
-    public class DefaultAbilityFactory
-    {
+        public void Remove(Ability other)
+        {
+            if (other == null) return;
 
+            Power -= other.Power;
+            Mass -= other.Mass;
+            MaxSpeed -= other.MaxSpeed;
+            //Life -= other.Life;
+        }
+    }
+    public enum EItemType
+    {
+        NoItem,
+        RidingItem,
+    }
+
+    public static class DefaultAbilityFactory
+    {
         class BaseFactory
         {
             public virtual Ability Make()
@@ -66,11 +83,12 @@ public class AbilityContainer : MonoBehaviour
                 ability.Mass = 4.0f;
                 ability.MaxSpeed = 4.0f;
                 ability.Life = 0;
+                ability.Type = EItemType.RidingItem;
                 return ability;
             }
         }
 
-        public Ability Make(ObjectManager.ObjectType type)
+        public static Ability Make(ObjectManager.ObjectType type)
         {
             if (type == ObjectManager.ObjectType.Car) { return new CarFactory().Make(); }
             else if (type == ObjectManager.ObjectType.Human) { return new HumanFactory().Make(); }
@@ -84,10 +102,13 @@ public class AbilityContainer : MonoBehaviour
     public delegate void OnDeath(GameObject other);
     public OnDeath OnDeathDelegator;
 
+    Dictionary<EItemType, Ability> ItemContainer;
+
     // Start is called before the first frame update
     void Start()
     {
-        MyAbility = new DefaultAbilityFactory().Make(ObjectManager.GetType(gameObject));
+        MyAbility = DefaultAbilityFactory.Make(ObjectManager.GetType(gameObject));
+        ItemContainer = new Dictionary<EItemType, Ability>();
     }
 
     // Update is called once per frame
@@ -123,9 +144,19 @@ public class AbilityContainer : MonoBehaviour
         gameObject.GetComponent<Rigidbody>().mass = newMass;
     }
 
+
     public void GetItem(AbilityContainer other)
     {
-        MyAbility.Add(other.MyAbility);
+        if (other.MyAbility.Type != EItemType.NoItem)
+        {
+            var otherAbility = other.MyAbility;
+            var item = ItemContainer.GetValueOrDefault(otherAbility.Type);
+            MyAbility.Remove(item);
+            MyAbility.Add(otherAbility);
+
+            ItemContainer.Remove(otherAbility.Type);
+            ItemContainer.Add(otherAbility.Type, otherAbility);
+        }
     }
 
     public void DecreaseLife()

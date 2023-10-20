@@ -18,7 +18,7 @@ public class CountDownTimer : MonoBehaviour
 
     private void OnEnable()
     {
-        const float DefaultTimeLimit = 1 * 30;
+        const float DefaultTimeLimit = 1 * 60;
         StartTime = Time.time + DefaultTimeLimit;
     }
 
