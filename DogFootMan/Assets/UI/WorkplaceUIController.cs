@@ -10,8 +10,24 @@ public class WorkplaceUIController : MonoBehaviour
     int ShapeCount;
     VisualElement MainPanel;
 
-    List<List<int>> SourceItemList;
+    List<List<ElementData>> SourceItemList;
     VisualElement CurrentSelectElement;
+
+    class ElementData
+    {
+        public int X;
+        public int Y;
+        public int Shape;
+        public bool bIsMatched;
+
+        public ElementData(int x, int y, int shape)
+        {
+            X = x;
+            Y = y;
+            Shape = shape;
+            bIsMatched = false;
+        }
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -24,7 +40,7 @@ public class WorkplaceUIController : MonoBehaviour
         }
 
         MainPanel = GetComponent<UIDocument>().rootVisualElement.Q<VisualElement>("MainPanel");
-        SourceItemList = new List<List<int>>();
+        SourceItemList = new List<List<ElementData>>();
 
         Init();
 
@@ -40,7 +56,7 @@ public class WorkplaceUIController : MonoBehaviour
     VisualElement MakeElement(int row, int col)
     {
         var element = new Button();
-        element.text = SourceItemList[row][col].ToString();
+        element.text = SourceItemList[row][col].Shape.ToString();
         element.userData = SourceItemList[row][col];
         element.style.width = 30.0f;
         element.style.height = 30.0f;
@@ -90,12 +106,64 @@ public class WorkplaceUIController : MonoBehaviour
 
     bool IsMatched(VisualElement other)
     {
-        if((int)CurrentSelectElement.userData != (int)other.userData)
+        var selectedElement = (ElementData)CurrentSelectElement.userData;
+        var otherElement = (ElementData)other.userData;
+        if(selectedElement.Shape != otherElement.Shape)
         {
             return false;
         }
-        // find path. if exist return true or false
+        return IsReachable(selectedElement, otherElement);
+    }
+
+    bool IsReachable(ElementData baseElem, ElementData destElem)
+    {
+        return DFSForMatching(baseElem, destElem, 0);
+    }
+
+    bool DFSForMatching(ElementData current, ElementData destination, int level)
+    {
+        if (level >= 3) return false;
+        if (current == destination) return true;
+
+        // GetToward for 4 direction
+        // if it returns null i need to process exceptionally
+        // if its not matched, call DFSForMatching from direct prior element
+
+
         return false;
+    }
+
+    enum ETowardDirection
+    {
+        Up,
+        Down,
+        Left, 
+        Right,
+    };
+    ElementData GetToward(ElementData baseElement, ETowardDirection direction)
+    {
+        int currentX = baseElement.X;
+        int currentY = baseElement.Y;
+
+        while(IsInArray(currentX, currentY))
+        {
+            switch(direction)
+            {
+                case ETowardDirection.Up: currentY--;break;
+                case ETowardDirection.Down: currentY++; break;
+                case ETowardDirection.Left: currentX--; break;
+                case ETowardDirection.Right: currentX++; break;
+            }
+            var currentElement = SourceItemList[currentY][currentX];
+            if (currentElement.bIsMatched) continue;
+            else return currentElement;
+        }
+        return null;
+    }
+
+    bool IsInArray(int x, int y)
+    {
+        return x >= 0 && x < Column && y >= 0 && y < Row;
     }
 
     void Init()
@@ -112,10 +180,10 @@ public class WorkplaceUIController : MonoBehaviour
 
         for (int i = 0; i < Row; ++i)
         {
-            var rowList = new List<int>();
+            var rowList = new List<ElementData>();
             for (int j = 0; j < Column; ++j)
             {
-                rowList.Add((int)shapes[i * Column + j]);
+                rowList.Add(new ElementData(i, j, (int)shapes[i * Column + j]));
             }
             SourceItemList.Add(rowList);
         }
