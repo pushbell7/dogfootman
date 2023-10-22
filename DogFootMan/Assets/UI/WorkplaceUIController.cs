@@ -9,9 +9,12 @@ public class WorkplaceUIController : MonoBehaviour
     int Column;
     int ShapeCount;
     VisualElement MainPanel;
-
     List<List<ElementData>> SourceItemList;
     VisualElement CurrentSelectElement;
+
+    Label TimeLabel;
+    float LimitedTime;
+    bool bFinished;
 
     class ElementData
     {
@@ -45,12 +48,33 @@ public class WorkplaceUIController : MonoBehaviour
         Init();
 
         Batch();
+
+
+        TimeLabel = GetComponent<UIDocument>().rootVisualElement.Q<Label>("Timer");
+        LimitedTime = Time.time + 1 * 60;
+        bFinished = false;
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (bFinished) return;
+
+        float remainedTime = LimitedTime - Time.time;
+        if (remainedTime >= 0)
+        {
+            TimeLabel.text = string.Format(System.TimeSpan.FromSeconds(remainedTime).ToString(@"mm\:ss"));
+        }
+        else
+        {
+            bFinished = true;
+            Debug.Log("game over");
+        }
+    }
+
+    void AddTime(float seconds)
+    {
+        LimitedTime += seconds;
     }
 
     VisualElement MakeElement(int row, int col)
