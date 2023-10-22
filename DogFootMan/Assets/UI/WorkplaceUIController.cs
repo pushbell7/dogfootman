@@ -56,11 +56,13 @@ public class WorkplaceUIController : MonoBehaviour
     VisualElement MakeElement(int row, int col)
     {
         var element = new Button();
-        element.text = SourceItemList[row][col].Shape.ToString();
-        element.userData = SourceItemList[row][col];
+        var elementData = SourceItemList[row][col];
+        element.text = elementData.Shape.ToString();
+        element.userData = elementData;
         element.style.width = 30.0f;
         element.style.height = 30.0f;
         element.style.backgroundColor = new StyleColor(Color.white);
+        element.visible = (elementData.bIsMatched == false);
         element.clicked += () =>
          {
              if (CurrentSelectElement == element) // cancel selection
@@ -80,6 +82,8 @@ public class WorkplaceUIController : MonoBehaviour
                      if(IsMatched(element))
                      {
                          // remove pair
+                         RemoveElement(element);
+                         RemoveElement(CurrentSelectElement);
                      }
                      else
                      {
@@ -103,7 +107,12 @@ public class WorkplaceUIController : MonoBehaviour
     {
         element.style.backgroundColor = new StyleColor(Color.white);
     }
-
+    static void RemoveElement(VisualElement element)
+    {
+        var elementData = (ElementData)element.userData;
+        elementData.bIsMatched = true;
+        element.visible = false;
+    }
     bool IsMatched(VisualElement other)
     {
         var selectedElement = (ElementData)CurrentSelectElement.userData;
@@ -117,18 +126,27 @@ public class WorkplaceUIController : MonoBehaviour
 
     bool IsReachable(ElementData baseElem, ElementData destElem)
     {
-        return DFSForMatching(baseElem, destElem, 0);
+        return DFSForMatching(baseElem, destElem, 0, ETowardDirection.Max);
     }
 
-    bool DFSForMatching(ElementData current, ElementData destination, int level)
+    bool DFSForMatching(ElementData current, ElementData destination, int level, ETowardDirection priorDirection)
     {
-        if (level >= 3) return false;
+        if (level > 3) return false;
         if (current == destination) return true;
 
-        // GetToward for 4 direction
-        // if it returns null i need to process exceptionally
-        // if its not matched, call DFSForMatching from direct prior element
+        if(current == null || (level != 0 && current.bIsMatched == false))
+        {
+            return false;
+        }
 
+        for(ETowardDirection dir = ETowardDirection.Up; dir < ETowardDirection.Max; ++dir)
+        {
+            if (IsOpposite(dir, priorDirection)) continue;
+            if (DFSForMatching(GetNext(current, dir), destination, level + (priorDirection == dir ? 0 : 1), dir))
+            {
+                return true;
+            }
+        }
 
         return false;
     }
@@ -136,34 +154,38 @@ public class WorkplaceUIController : MonoBehaviour
     enum ETowardDirection
     {
         Up,
-        Down,
         Left, 
+        Down,
         Right,
+        Max
     };
-    ElementData GetToward(ElementData baseElement, ETowardDirection direction)
+    bool IsOpposite(ETowardDirection one, ETowardDirection other)
     {
+        return (ETowardDirection)((int)(one + 2) % (int)ETowardDirection.Max) == other;
+    }
+    ElementData GetNext(ElementData baseElement, ETowardDirection direction)
+    {
+        if (baseElement == null) return null;
         int currentX = baseElement.X;
         int currentY = baseElement.Y;
 
-        while(IsInArray(currentX, currentY))
+        switch (direction)
         {
-            switch(direction)
-            {
-                case ETowardDirection.Up: currentY--;break;
-                case ETowardDirection.Down: currentY++; break;
-                case ETowardDirection.Left: currentX--; break;
-                case ETowardDirection.Right: currentX++; break;
-            }
-            var currentElement = SourceItemList[currentY][currentX];
-            if (currentElement.bIsMatched) continue;
-            else return currentElement;
+            case ETowardDirection.Up: currentY--; break;
+            case ETowardDirection.Left: currentX--; break;
+            case ETowardDirection.Down: currentY++; break;
+            case ETowardDirection.Right: currentX++; break;
         }
-        return null;
+        if (IsInArray(currentX, currentY) == false)
+        {
+            return null;
+        }
+        return GetElement(currentX, currentY);
     }
 
     bool IsInArray(int x, int y)
     {
-        return x >= 0 && x < Column && y >= 0 && y < Row;
+        return x >= 0 && x < Row + 2 && y >= 0 && y < Column + 2;
     }
 
     void Init()
@@ -178,24 +200,42 @@ public class WorkplaceUIController : MonoBehaviour
         }
         Shuffle(shapes);
 
-        for (int i = 0; i < Row; ++i)
+        for (int i = 0; i < Row + 2; ++i)
         {
             var rowList = new List<ElementData>();
-            for (int j = 0; j < Column; ++j)
+            for (int j = 0; j < Column + 2; ++j)
             {
-                rowList.Add(new ElementData(i, j, (int)shapes[i * Column + j]));
+                if (IsBorder(i, j))
+                {
+                    var border = new ElementData(i, j, -1);
+                    border.bIsMatched = true;
+                    rowList.Add(border);
+                }
+                else
+                {
+                    rowList.Add(new ElementData(i, j, (int)shapes[(i - 1) * Column + (j - 1)]));
+                }
             }
             SourceItemList.Add(rowList);
         }
+    }
+    ElementData GetElement(int row, int col)
+    {
+        return SourceItemList[row][col];
+    }
+
+    bool IsBorder(int i, int j)
+    {
+        return i == 0 || i == Row + 1 || j == 0 || j == Column + 1;
     }
 
     void Batch()
     {
         var rowList = new ScrollView(ScrollViewMode.Vertical);
-        for(int i = 0; i < Row; ++i)
+        for(int i = 0; i < Row + 2; ++i)
         {
             var colList = new ScrollView(ScrollViewMode.Horizontal);
-            for(int j = 0; j < Column; ++j)
+            for(int j = 0; j < Column + 2; ++j)
             {
                 colList.Add(MakeElement(i,j));
             }
