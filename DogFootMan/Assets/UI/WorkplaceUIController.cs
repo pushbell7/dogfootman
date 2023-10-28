@@ -15,7 +15,8 @@ public class WorkplaceUIController : MonoBehaviour
     Label TimeLabel;
     float LimitedTime;
     bool bFinished;
-
+    const float ElementWidth = 30.0f;
+    const float ElementHeight = 30.0f;
     class ElementData
     {
         public int X;
@@ -77,14 +78,27 @@ public class WorkplaceUIController : MonoBehaviour
         LimitedTime += seconds;
     }
 
+    Vector3 GetDeltaPosition(ETowardDirection direction)
+    {
+        switch(direction)
+        {
+            case ETowardDirection.Up: return new Vector3(0, -ElementHeight);
+            case ETowardDirection.Left: return new Vector3(-ElementWidth, 0);
+            case ETowardDirection.Down: return new Vector3(0, ElementHeight);
+            case ETowardDirection.Right: return new Vector3(ElementWidth, 0);
+            default: return Vector3.zero;
+        }
+    }
     VisualElement MakeElement(int row, int col)
     {
         var element = new Button();
         var elementData = SourceItemList[row][col];
         element.text = elementData.Shape.ToString();
         element.userData = elementData;
-        element.style.width = 30.0f;
-        element.style.height = 30.0f;
+        element.style.width = ElementWidth;
+        element.style.height = ElementHeight;
+        SetMargin(element, 0);
+        //MakeBorder(element, Color.yellow, 1.0f);
         element.style.backgroundColor = new StyleColor(Color.white);
         element.visible = (elementData.bIsMatched == false);
         element.clicked += () =>
@@ -103,16 +117,26 @@ public class WorkplaceUIController : MonoBehaviour
                  }
                  else // second selection
                  {
-                     if(IsMatched(element))
+                     Stack<ETowardDirection> resultPath;
+                     if(IsMatched(element, out resultPath))
                      {
                          // show effect
-                         var from = element.LocalToWorld(element.contentRect.center);
-                         var to = CurrentSelectElement.LocalToWorld(CurrentSelectElement.contentRect.center);
+                         var from = CurrentSelectElement.LocalToWorld(CurrentSelectElement.contentRect.center);
+                         var to = element.LocalToWorld(element.contentRect.center);
+                         Debug.Log(string.Format("deltaPosition : {0}", to - from));
 
                          System.Action<MeshGenerationContext> action = (MeshGenerationContext context) =>
                          {
-                             Vector3[] points = { from, to };
-                             DrawCable(points, 1, Color.red, context);
+                             List<Vector3> points = new List<Vector3>();
+                             points.Add(from);
+
+                             Vector3 currentPosition = from;
+                             foreach(var dir in resultPath)
+                             {
+                                 currentPosition += GetDeltaPosition(dir);
+                                 points.Add(currentPosition);
+                             }
+                             DrawCable(points.ToArray(), 1, Color.red, context);
                          };
                          MainPanel.generateVisualContent += action;
                          MainPanel.MarkDirtyRepaint();
@@ -166,23 +190,31 @@ public class WorkplaceUIController : MonoBehaviour
         elementData.bIsMatched = true;
         element.visible = false;
     }
-    bool IsMatched(VisualElement other)
+    bool IsMatched(VisualElement other, out Stack<ETowardDirection> outResultPath)
     {
         var selectedElement = (ElementData)CurrentSelectElement.userData;
         var otherElement = (ElementData)other.userData;
         if(selectedElement.Shape != otherElement.Shape)
         {
+            outResultPath = null;
             return false;
         }
-        return IsReachable(selectedElement, otherElement);
+
+        outResultPath = GetReachablePath(selectedElement, otherElement);
+        return outResultPath != null;
     }
 
-    bool IsReachable(ElementData baseElem, ElementData destElem)
+    Stack<ETowardDirection> GetReachablePath(ElementData baseElem, ElementData destElem)
     {
-        return DFSForMatching(baseElem, destElem, 0, ETowardDirection.Max);
+        Stack<ETowardDirection> result = new Stack<ETowardDirection>();
+        if(DFSForMatching(baseElem, destElem, 0, ETowardDirection.Max, in result))
+        {
+            return result;
+        }
+        return null;
     }
 
-    bool DFSForMatching(ElementData current, ElementData destination, int level, ETowardDirection priorDirection)
+    bool DFSForMatching(ElementData current, ElementData destination, int level, ETowardDirection priorDirection, in Stack<ETowardDirection> inResult)
     {
         if (level > 3) return false;
         if (current == destination) return true;
@@ -195,8 +227,9 @@ public class WorkplaceUIController : MonoBehaviour
         for(ETowardDirection dir = ETowardDirection.Up; dir < ETowardDirection.Max; ++dir)
         {
             if (IsOpposite(dir, priorDirection)) continue;
-            if (DFSForMatching(GetNext(current, dir), destination, level + (priorDirection == dir ? 0 : 1), dir))
+            if (DFSForMatching(GetNext(current, dir), destination, level + (priorDirection == dir ? 0 : 1), dir, inResult))
             {
+                inResult.Push(dir);
                 return true;
             }
         }
@@ -238,7 +271,7 @@ public class WorkplaceUIController : MonoBehaviour
 
     bool IsInArray(int x, int y)
     {
-        return x >= 0 && x < Row + 2 && y >= 0 && y < Column + 2;
+        return y >= 0 && y < Row + 2 && x >= 0 && x < Column + 2;
     }
 
     void Init()
@@ -253,44 +286,48 @@ public class WorkplaceUIController : MonoBehaviour
         }
         Shuffle(shapes);
 
-        for (int i = 0; i < Row + 2; ++i)
+        for (int y = 0; y < Row + 2; ++y)
         {
             var rowList = new List<ElementData>();
-            for (int j = 0; j < Column + 2; ++j)
+            for (int x = 0; x < Column + 2; ++x)
             {
-                if (IsBorder(i, j))
+                if (IsBorder(x, y))
                 {
-                    var border = new ElementData(i, j, -1);
+                    var border = new ElementData(x, y, -1);
                     border.bIsMatched = true;
                     rowList.Add(border);
                 }
                 else
                 {
-                    rowList.Add(new ElementData(i, j, (int)shapes[(i - 1) * Column + (j - 1)]));
+                    rowList.Add(new ElementData(x, y, (int)shapes[(y - 1) * Column + (x - 1)]));
                 }
             }
             SourceItemList.Add(rowList);
         }
     }
-    ElementData GetElement(int row, int col)
+    ElementData GetElement(int x, int y)
     {
-        return SourceItemList[row][col];
+        return SourceItemList[y][x];
     }
 
-    bool IsBorder(int i, int j)
+    bool IsBorder(int x, int y)
     {
-        return i == 0 || i == Row + 1 || j == 0 || j == Column + 1;
+        return y == 0 || y == Row + 1 || x == 0 || x == Column + 1;
     }
 
     void Batch()
     {
         var rowList = new ScrollView(ScrollViewMode.Vertical);
-        for(int i = 0; i < Row + 2; ++i)
+        //MakeBorder(rowList, Color.red, 1.0f);
+        rowList.style.paddingBottom = 0;
+        rowList.style.paddingTop = 0;
+        for (int y = 0; y < Row + 2; ++y)
         {
             var colList = new ScrollView(ScrollViewMode.Horizontal);
-            for(int j = 0; j < Column + 2; ++j)
+            //MakeBorder(colList, Color.blue, 1.0f);
+            for (int x = 0; x < Column + 2; ++x)
             {
-                colList.Add(MakeElement(i,j));
+                colList.Add(MakeElement(y,x));
             }
             rowList.Add(colList);
         }
@@ -310,6 +347,25 @@ public class WorkplaceUIController : MonoBehaviour
             array[k] = array[n];
             array[n] = value;
         }
+    }
+    static void SetMargin(VisualElement element, float margin)
+    {
+        element.style.marginBottom = margin;
+        element.style.marginTop = margin;
+        element.style.marginLeft = margin;
+        element.style.marginRight = margin;
+    }
+
+    static void MakeBorder(VisualElement element, Color color, float width)
+    {
+        element.style.borderBottomColor = color;
+        element.style.borderBottomWidth = width;
+        element.style.borderTopColor = color;
+        element.style.borderTopWidth = width;
+        element.style.borderLeftColor = color;
+        element.style.borderLeftWidth = width;
+        element.style.borderRightColor = color;
+        element.style.borderRightWidth = width;
     }
 
     // copied from https://forum.unity.com/threads/draw-a-line-from-a-to-b.698618/
