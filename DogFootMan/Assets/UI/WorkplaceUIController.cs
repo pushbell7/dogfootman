@@ -9,6 +9,7 @@ public class WorkplaceUIController : MonoBehaviour
     int Column;
     int ShapeCount;
     VisualElement MainPanel;
+    VisualElement EffectLayer;
     List<List<ElementData>> SourceItemList;
     VisualElement CurrentSelectElement;
 
@@ -44,6 +45,7 @@ public class WorkplaceUIController : MonoBehaviour
         }
 
         MainPanel = GetComponent<UIDocument>().rootVisualElement.Q<VisualElement>("MainPanel");
+        EffectLayer = GetComponent<UIDocument>().rootVisualElement.Q<VisualElement>("EffectLayer");
         SourceItemList = new List<List<ElementData>>();
 
         Init();
@@ -80,13 +82,18 @@ public class WorkplaceUIController : MonoBehaviour
 
     Vector3 GetDeltaPosition(ETowardDirection direction)
     {
-        switch(direction)
+        var deltaPosition = GetDeltaPositionInArray(direction);
+        return new Vector3(deltaPosition.x * ElementWidth, deltaPosition.y * ElementHeight, 0);
+    }
+    Vector2Int GetDeltaPositionInArray(ETowardDirection direction)
+    {
+        switch (direction)
         {
-            case ETowardDirection.Up: return new Vector3(0, -ElementHeight);
-            case ETowardDirection.Left: return new Vector3(-ElementWidth, 0);
-            case ETowardDirection.Down: return new Vector3(0, ElementHeight);
-            case ETowardDirection.Right: return new Vector3(ElementWidth, 0);
-            default: return Vector3.zero;
+            case ETowardDirection.Up: return new Vector2Int(0, -1);
+            case ETowardDirection.Left: return new Vector2Int(-1, 0);
+            case ETowardDirection.Down: return new Vector2Int(0, 1);
+            case ETowardDirection.Right: return new Vector2Int(1, 0);
+            default: return Vector2Int.zero;
         }
     }
     VisualElement MakeElement(int row, int col)
@@ -122,8 +129,6 @@ public class WorkplaceUIController : MonoBehaviour
                      {
                          // show effect
                          var from = CurrentSelectElement.LocalToWorld(CurrentSelectElement.contentRect.center);
-                         var to = element.LocalToWorld(element.contentRect.center);
-                         Debug.Log(string.Format("deltaPosition : {0}", to - from));
 
                          System.Action<MeshGenerationContext> action = (MeshGenerationContext context) =>
                          {
@@ -138,8 +143,8 @@ public class WorkplaceUIController : MonoBehaviour
                              }
                              DrawCable(points.ToArray(), 1, Color.red, context);
                          };
-                         MainPanel.generateVisualContent += action;
-                         MainPanel.MarkDirtyRepaint();
+                         EffectLayer.generateVisualContent += action;
+                         EffectLayer.MarkDirtyRepaint();
 
                          UnselectElement(CurrentSelectElement);
                          RemoveElements(CurrentSelectElement, element, action);
@@ -163,8 +168,8 @@ public class WorkplaceUIController : MonoBehaviour
             RemoveElement(fromElement);
             RemoveElement(toElement);
 
-            MainPanel.generateVisualContent -= action;
-            MainPanel.MarkDirtyRepaint();
+            EffectLayer.generateVisualContent -= action;
+            EffectLayer.MarkDirtyRepaint();
         }));
     }
 
@@ -214,6 +219,28 @@ public class WorkplaceUIController : MonoBehaviour
         return null;
     }
 
+    List<ETowardDirection> GetCandidateByHeuristic(ElementData current, ElementData destination, ETowardDirection priorDirection)
+    {
+        List<ETowardDirection> result = new List<ETowardDirection>();
+        for(ETowardDirection dir = ETowardDirection.Up; dir < ETowardDirection.Max; ++dir)
+        {
+            if (IsOpposite(dir, priorDirection)) continue;
+            result.Add(dir);
+        }
+
+        // sort from direction getting near to far
+        Vector2Int currentPos = new Vector2Int(current.X, current.Y);
+        Vector2Int destPos = new Vector2Int(destination.X, destination.Y);
+        result.Sort((ETowardDirection left, ETowardDirection right) =>
+        {
+            var leftDelta = (destPos - (currentPos + GetDeltaPositionInArray(left))).sqrMagnitude;
+            var rightDelta = (destPos - (currentPos + GetDeltaPositionInArray(right))).sqrMagnitude;
+
+            return leftDelta - rightDelta;
+        });
+
+        return result;
+    }
     bool DFSForMatching(ElementData current, ElementData destination, int level, ETowardDirection priorDirection, in Stack<ETowardDirection> inResult)
     {
         if (level > 3) return false;
@@ -223,10 +250,9 @@ public class WorkplaceUIController : MonoBehaviour
         {
             return false;
         }
-
-        for(ETowardDirection dir = ETowardDirection.Up; dir < ETowardDirection.Max; ++dir)
+        var candidates = GetCandidateByHeuristic(current, destination, priorDirection);
+        foreach(var dir in candidates)
         {
-            if (IsOpposite(dir, priorDirection)) continue;
             if (DFSForMatching(GetNext(current, dir), destination, level + (priorDirection == dir ? 0 : 1), dir, inResult))
             {
                 inResult.Push(dir);
@@ -374,6 +400,7 @@ public class WorkplaceUIController : MonoBehaviour
         List<Vertex> vertices = new List<Vertex>();
         List<ushort> indices = new List<ushort>();
 
+        float ZOrder = Vertex.nearZ;
         for (int i = 0; i < points.Length - 1; i++)
         {
             var pointA = points[i];
@@ -385,32 +412,32 @@ public class WorkplaceUIController : MonoBehaviour
 
             vertices.Add(new Vertex()
             {
-                position = new Vector3(pointA.x + offsetX, pointA.y - offsetY, Vertex.nearZ),
+                position = new Vector3(pointA.x + offsetX, pointA.y - offsetY, ZOrder),
                 tint = color
             });
             vertices.Add(new Vertex()
             {
-                position = new Vector3(pointB.x + offsetX, pointB.y - offsetY, Vertex.nearZ),
+                position = new Vector3(pointB.x + offsetX, pointB.y - offsetY, ZOrder),
                 tint = color
             });
             vertices.Add(new Vertex()
             {
-                position = new Vector3(pointB.x - offsetX, pointB.y + offsetY, Vertex.nearZ),
+                position = new Vector3(pointB.x - offsetX, pointB.y + offsetY, ZOrder),
                 tint = color
             });
             vertices.Add(new Vertex()
             {
-                position = new Vector3(pointB.x - offsetX, pointB.y + offsetY, Vertex.nearZ),
+                position = new Vector3(pointB.x - offsetX, pointB.y + offsetY, ZOrder),
                 tint = color
             });
             vertices.Add(new Vertex()
             {
-                position = new Vector3(pointA.x - offsetX, pointA.y + offsetY, Vertex.nearZ),
+                position = new Vector3(pointA.x - offsetX, pointA.y + offsetY, ZOrder),
                 tint = color
             });
             vertices.Add(new Vertex()
             {
-                position = new Vector3(pointA.x + offsetX, pointA.y - offsetY, Vertex.nearZ),
+                position = new Vector3(pointA.x + offsetX, pointA.y - offsetY, ZOrder),
                 tint = color
             });
 
