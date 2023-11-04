@@ -12,6 +12,7 @@ public class WorkplaceUIController : MonoBehaviour
     VisualElement EffectLayer;
     List<List<ElementData>> SourceItemList;
     VisualElement CurrentSelectElement;
+    bool bIsFireMode;
 
     Label TimeLabel;
     float LimitedTime;
@@ -32,6 +33,13 @@ public class WorkplaceUIController : MonoBehaviour
             Shape = shape;
             bIsMatched = false;
         }
+    }
+
+    enum EItemType
+    {
+        ChangeBatch,
+        FirePair,
+        AddTime,
     }
     // Start is called before the first frame update
     void Start()
@@ -56,6 +64,14 @@ public class WorkplaceUIController : MonoBehaviour
         TimeLabel = GetComponent<UIDocument>().rootVisualElement.Q<Label>("Timer");
         LimitedTime = Time.time + 1 * 60;
         bFinished = false;
+
+        var itemGroup = GetComponent<UIDocument>().rootVisualElement.Q<VisualElement>("ItemGroup");
+        var changeBatchButton = itemGroup.Q<Button>("ChangeBatch");
+        changeBatchButton.clicked += ChangeBatch;
+        var FirePairButton = itemGroup.Q<Button>("FirePair");
+        FirePairButton.clicked += SetFirePairMode;
+        var addTimeButton = itemGroup.Q<Button>("AddTime");
+        addTimeButton.clicked += AddTime;
     }
 
     // Update is called once per frame
@@ -75,6 +91,56 @@ public class WorkplaceUIController : MonoBehaviour
         }
     }
 
+    bool IsThereItem(EItemType itemType)
+    {
+        return true;
+    }
+
+    void SetFirePairMode()
+    {
+        if(IsThereItem(EItemType.FirePair))
+        {
+            bIsFireMode = true;
+        }
+    }
+    void ChangeBatch()
+    {
+        if(IsThereItem(EItemType.ChangeBatch))
+        {
+            MainPanel.RemoveAt(0);
+            // shuffle SourceItemList
+            ArrayList temporaryShapes = new ArrayList();
+            foreach(var rowList in SourceItemList)
+            {
+                foreach(var element in rowList)
+                {
+                    if (element.bIsMatched) continue;
+                    temporaryShapes.Add(element.Shape);
+                }
+            }
+            Shuffle(temporaryShapes);
+            int cursor = 0;
+            foreach(var rowList in SourceItemList)
+            {
+                foreach(var element in rowList)
+                {
+                    if (element.bIsMatched) continue;
+                    element.Shape = (int)temporaryShapes[cursor++];
+                }
+            }
+
+            Batch();
+        }
+    }
+
+    void AddTime()
+    {
+        if (IsThereItem(EItemType.AddTime))
+        {
+            const float TimeToAdd = 10.0f;
+            AddTime(TimeToAdd);
+        }
+    }
     void AddTime(float seconds)
     {
         LimitedTime += seconds;
@@ -114,6 +180,7 @@ public class WorkplaceUIController : MonoBehaviour
              {
                  UnselectElement(element);
                  CurrentSelectElement = null;
+                 bIsFireMode = false;
              }
              else
              {
@@ -124,36 +191,51 @@ public class WorkplaceUIController : MonoBehaviour
                  }
                  else // second selection
                  {
-                     Stack<ETowardDirection> resultPath;
-                     if(IsMatched(element, out resultPath))
+                     if (bIsFireMode)
                      {
-                         // show effect
-                         var from = CurrentSelectElement.LocalToWorld(CurrentSelectElement.contentRect.center);
-
-                         System.Action<MeshGenerationContext> action = (MeshGenerationContext context) =>
+                         if(IsSamePair(element))
                          {
-                             List<Vector3> points = new List<Vector3>();
-                             points.Add(from);
-
-                             Vector3 currentPosition = from;
-                             foreach(var dir in resultPath)
-                             {
-                                 currentPosition += GetDeltaPosition(dir);
-                                 points.Add(currentPosition);
-                             }
-                             DrawCable(points.ToArray(), 1, Color.red, context);
-                         };
-                         EffectLayer.generateVisualContent += action;
-                         EffectLayer.MarkDirtyRepaint();
-
+                             // show fire effect
+                             RemoveElement(CurrentSelectElement);
+                             RemoveElement(element);
+                             // consume item
+                         }
                          UnselectElement(CurrentSelectElement);
-                         RemoveElements(CurrentSelectElement, element, action);
+                         bIsFireMode = false;
                      }
                      else
                      {
-                         // unselect pair
-                         UnselectElement(element);
-                         UnselectElement(CurrentSelectElement);
+                         Stack<ETowardDirection> resultPath;
+                         if (IsMatched(element, out resultPath))
+                         {
+                             // show effect
+                             var from = CurrentSelectElement.LocalToWorld(CurrentSelectElement.contentRect.center);
+
+                             System.Action<MeshGenerationContext> action = (MeshGenerationContext context) =>
+                             {
+                                 List<Vector3> points = new List<Vector3>();
+                                 points.Add(from);
+
+                                 Vector3 currentPosition = from;
+                                 foreach (var dir in resultPath)
+                                 {
+                                     currentPosition += GetDeltaPosition(dir);
+                                     points.Add(currentPosition);
+                                 }
+                                 DrawCable(points.ToArray(), 1, Color.red, context);
+                             };
+                             EffectLayer.generateVisualContent += action;
+                             EffectLayer.MarkDirtyRepaint();
+
+                             UnselectElement(CurrentSelectElement);
+                             RemoveElements(CurrentSelectElement, element, action);
+                         }
+                         else
+                         {
+                             // unselect pair
+                             UnselectElement(element);
+                             UnselectElement(CurrentSelectElement);
+                         }
                      }
                      CurrentSelectElement = null;
                  }
@@ -194,6 +276,12 @@ public class WorkplaceUIController : MonoBehaviour
         var elementData = (ElementData)element.userData;
         elementData.bIsMatched = true;
         element.visible = false;
+    }
+    bool IsSamePair(VisualElement other)
+    {
+        var selectedElement = (ElementData)CurrentSelectElement.userData;
+        var otherElement = (ElementData)other.userData;
+        return selectedElement.Shape == otherElement.Shape;
     }
     bool IsMatched(VisualElement other, out Stack<ETowardDirection> outResultPath)
     {

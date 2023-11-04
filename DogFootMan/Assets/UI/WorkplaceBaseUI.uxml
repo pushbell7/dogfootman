@@ -4,4 +4,9 @@
         <ui:Label tabindex="-1" text="00:00" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Timer" />
     </ui:VisualElement>
     <ui:VisualElement name="EffectLayer" picking-mode="Ignore" style="flex-grow: 1; position: absolute; left: 0; top: 0; right: 0; bottom: 0; background-color: rgba(56, 56, 56, 0);" />
+    <ui:VisualElement name="ItemGroup" style="flex-grow: 1; align-self: flex-end; flex-direction: row-reverse; justify-content: flex-end; align-items: flex-end; position: absolute; flex-wrap: nowrap;">
+        <ui:Button text="ChangeBatch" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ChangeBatch" />
+        <ui:Button text="FirePair" parse-escape-sequences="true" display-tooltip-when-elided="true" name="FirePair" />
+        <ui:Button text="AddTime" parse-escape-sequences="true" display-tooltip-when-elided="true" name="AddTime" />
+    </ui:VisualElement>
 </ui:UXML>
