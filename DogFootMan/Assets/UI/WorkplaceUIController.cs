@@ -13,6 +13,7 @@ public class WorkplaceUIController : MonoBehaviour
     List<List<ElementData>> SourceItemList;
     VisualElement CurrentSelectElement;
     bool bIsFireMode;
+    bool bIsPlayingTimerEffect;
 
     Label TimeLabel;
     float LimitedTime;
@@ -79,6 +80,12 @@ public class WorkplaceUIController : MonoBehaviour
     {
         if (bFinished) return;
 
+        if(bIsPlayingTimerEffect)
+        {
+            TimeLabel.text = string.Format(System.TimeSpan.FromSeconds((int)Random.Range(0, LimitedTime)).ToString(@"mm\:ss"));
+            return;
+        }
+
         float remainedTime = LimitedTime - Time.time;
         if (remainedTime >= 0)
         {
@@ -144,6 +151,10 @@ public class WorkplaceUIController : MonoBehaviour
     void AddTime(float seconds)
     {
         LimitedTime += seconds;
+        bIsPlayingTimerEffect = true;
+        StartCoroutine(DelayAction(1f, () => {
+            bIsPlayingTimerEffect = false;
+        }));
     }
 
     Vector3 GetDeltaPosition(ETowardDirection direction)
