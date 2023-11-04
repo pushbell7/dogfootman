@@ -14,6 +14,7 @@ public class WorkplaceUIController : MonoBehaviour
     VisualElement CurrentSelectElement;
     bool bIsFireMode;
     bool bIsPlayingTimerEffect;
+    Sprite[] FireSprites;
 
     Label TimeLabel;
     float LimitedTime;
@@ -73,6 +74,8 @@ public class WorkplaceUIController : MonoBehaviour
         FirePairButton.clicked += SetFirePairMode;
         var addTimeButton = itemGroup.Q<Button>("AddTime");
         addTimeButton.clicked += AddTime;
+
+        FireSprites = Resources.LoadAll<Sprite>("Textures/firesprite");
     }
 
     // Update is called once per frame
@@ -207,8 +210,7 @@ public class WorkplaceUIController : MonoBehaviour
                          if(IsSamePair(element))
                          {
                              // show fire effect
-                             RemoveElement(CurrentSelectElement);
-                             RemoveElement(element);
+                             FireElements(CurrentSelectElement, element);
                              // consume item
                          }
                          UnselectElement(CurrentSelectElement);
@@ -254,6 +256,34 @@ public class WorkplaceUIController : MonoBehaviour
          };
         return element;
     }
+    void FireElements(VisualElement firstElement, VisualElement secondElement)
+    {
+        StartCoroutine(FireElement(firstElement));
+        StartCoroutine(FireElement(secondElement));
+    }
+
+    IEnumerator FireElement(VisualElement element)
+    {
+        foreach(var sprite in FireSprites)
+        {
+            if (element.childCount > 0)
+            {
+                element.RemoveAt(0);
+            }
+            var image = new Image()
+            {
+                sprite = sprite,
+                scaleMode = ScaleMode.StretchToFill
+            };
+            image.StretchToParentSize();
+            element.Add(image);
+            yield return new WaitForSeconds(0.3f);
+        }
+
+        element.RemoveAt(0);
+        RemoveElement(element);
+    }
+
     void RemoveElements(VisualElement fromElement, VisualElement toElement, System.Action<MeshGenerationContext> action)
     {
         StartCoroutine(DelayAction(0.3f, ()=> {
@@ -553,4 +583,6 @@ public class WorkplaceUIController : MonoBehaviour
         mesh.SetAllVertices(vertices.ToArray());
         mesh.SetAllIndices(indices.ToArray());
     }
+
+
 }
