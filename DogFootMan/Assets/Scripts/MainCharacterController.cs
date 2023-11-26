@@ -11,10 +11,10 @@ public class MainCharacterController : MonoBehaviour
     {
         RigidBody = GetComponent<Rigidbody>();
         MyAbility = GetComponent<AbilityContainer>();
-        MyAbility.OnDeathDelegator += OnDeathHandpler;
+        MyAbility.OnDeathDelegator += OnDeathHandler;
     }
 
-    static void OnDeathHandpler(GameObject MyObject)
+    static void OnDeathHandler(GameObject MyObject)
     {
         Debug.Log("Die.");
     }
