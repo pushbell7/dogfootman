@@ -8,11 +8,51 @@ public class AbilityContainer : MonoBehaviour
     [System.Serializable]
     public class Ability
     {
-        public float Power;
+        float power;
+        public float Power
+        {
+            get
+            {
+                return bIsBoosted ? power * 3 : power;
+            }
+            set
+            {
+                power = value;
+            }
+        }
         public float Mass;
-        public float MaxSpeed;
+        float maxSpeed;
+        public float MaxSpeed
+        {
+            get
+            {
+                return bIsBoosted ? maxSpeed * 3 : maxSpeed;
+            }
+            set
+            {
+                maxSpeed = value;
+            }
+        }
+        public float MaxStamina;
+        float currentStamina;
+        public float CurrentStamina
+        {
+            get
+            {
+                return currentStamina;
+            }
+            set
+            {
+                currentStamina = MaxStamina < value ? MaxStamina : value;
+                if(currentStamina < 0)
+                {
+                    bIsBoosted = false;
+                }
+            }
+        }
         public int Life;
         public EItemType Type;
+        public bool bIsBoosted;
 
         public void Add(Ability other)
         {
@@ -58,6 +98,7 @@ public class AbilityContainer : MonoBehaviour
                 ability.Mass = 1.0f;
                 ability.MaxSpeed = 5.0f;
                 ability.Life = 3;
+                ability.CurrentStamina = ability.MaxStamina = 100.0f;
                 return ability;
             }
         }
@@ -144,7 +185,18 @@ public class AbilityContainer : MonoBehaviour
         gameObject.GetComponent<Rigidbody>().mass = newMass;
     }
 
-
+    public void SetBoostMode(bool bIsBoosted)
+    {
+        MyAbility.bIsBoosted = bIsBoosted;
+    }
+    public void AdjustStamina(float delta)
+    {
+        MyAbility.CurrentStamina += delta;
+    }
+    public float GetCurrentStamina()
+    {
+        return MyAbility.CurrentStamina;
+    }
     public void GetItem(AbilityContainer other)
     {
         if (other.MyAbility.Type != EItemType.NoItem)

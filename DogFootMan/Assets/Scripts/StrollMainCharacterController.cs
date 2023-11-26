@@ -12,6 +12,8 @@ public class StrollMainCharacterController : MonoBehaviour
     {
         RigidBody = GetComponent<Rigidbody>();
         MyAbility = GetComponent<AbilityContainer>();
+
+        CurrentRotation = transform.rotation.eulerAngles.y;
     }
 
     // Update is called once per frame
@@ -22,13 +24,39 @@ public class StrollMainCharacterController : MonoBehaviour
 
     private void Move()
     {
-        float vertical = Input.GetAxis("Vertical");
-        float horizontal = Input.GetAxis("Horizontal");
-        CurrentRotation += horizontal * Time.deltaTime * 100.0f;
-        CurrentRotation %= 360;
-        RigidBody.AddForce(transform.forward * vertical * Time.deltaTime * MyAbility.GetPower());
-        RigidBody.rotation = (Quaternion.Euler(new(0, CurrentRotation, 0)));
-        RigidBody.velocity = Vector3.ClampMagnitude(RigidBody.velocity, MyAbility.GetMaxSpeed());
+        if (MyAbility.GetCurrentStamina() > 0)
+        {
+            if (Input.GetButton("Fire1"))
+            {
+                MyAbility.AdjustStamina(Time.deltaTime * -20);
+                MyAbility.SetBoostMode(true);
+            }
+            else
+            {
+                MyAbility.AdjustStamina(Time.deltaTime * 10);
+                MyAbility.SetBoostMode(false);
+            }
+        }
+        else
+        {
+            MyAbility.AdjustStamina(Time.deltaTime * 10);
+            MyAbility.SetBoostMode(false);
+        }
+
+        {
+            float vertical = Input.GetAxis("Vertical");
+            Vector3 acceleration = transform.forward * vertical * Time.deltaTime * MyAbility.GetPower();
+            float maxSpeed = MyAbility.GetMaxSpeed();
+
+            RigidBody.AddForce(acceleration);
+            RigidBody.velocity = Vector3.ClampMagnitude(RigidBody.velocity, maxSpeed);
+        }
+        {
+            float horizontal = Input.GetAxis("Horizontal");
+            CurrentRotation += horizontal * Time.deltaTime * 100.0f;
+            CurrentRotation %= 360;
+            RigidBody.rotation = (Quaternion.Euler(new(0, CurrentRotation, 0)));
+        }
 
     }
 }
