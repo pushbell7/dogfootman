@@ -186,7 +186,7 @@ GameObject:
   m_Component:
   - component: {fileID: 205773306}
   - component: {fileID: 205773307}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Point (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -235,7 +235,7 @@ GameObject:
   - component: {fileID: 208768253}
   - component: {fileID: 208768252}
   - component: {fileID: 208768255}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Path
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32412,7 +32412,7 @@ GameObject:
   m_Component:
   - component: {fileID: 213763181}
   - component: {fileID: 213763182}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Point
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32551,7 +32551,7 @@ GameObject:
   m_Component:
   - component: {fileID: 438333332}
   - component: {fileID: 438333333}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Point (8)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32598,7 +32598,7 @@ GameObject:
   m_Component:
   - component: {fileID: 499214666}
   - component: {fileID: 499214667}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Point (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32698,7 +32698,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1037295265}
   - component: {fileID: 1037295266}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Point (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32745,7 +32745,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1044681360}
   - component: {fileID: 1044681361}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Point (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32954,7 +32954,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1210653440}
   - component: {fileID: 1210653441}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Point (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33001,7 +33001,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1212109144}
   - component: {fileID: 1212109145}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Point (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33307,7 +33307,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1720084341}
   - component: {fileID: 1720084342}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Point (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -20,6 +20,7 @@ public class StrollMainCharacterController : MonoBehaviour
     void Update()
     {
         Move();
+        CheckOnPath();
     }
 
     private void Move()
@@ -58,5 +59,23 @@ public class StrollMainCharacterController : MonoBehaviour
             RigidBody.rotation = (Quaternion.Euler(new(0, CurrentRotation, 0)));
         }
 
+    }
+
+    void CheckOnPath()
+    {
+        var collider = GetComponent<CapsuleCollider>();
+        var ray = new Ray(transform.position, -transform.up * collider.height);
+        RaycastHit hitResult;
+        //if (Physics.SphereCast(transform.position, collider.height, -transform.up, out hitResult) == false)
+        if (Physics.Raycast(ray, out hitResult, collider.height, LayerMask.GetMask("Road")))
+        {
+            Debug.Log(hitResult.collider.gameObject.name);
+        }
+        else
+        {
+            Debug.Log("out!");
+        }
+        Debug.DrawRay(transform.position, -transform.up * collider.height, Color.black, 60);
+            
     }
 }

@@ -26,20 +26,27 @@ public class MakeColliderFromLineRenderer : MonoBehaviour
                 positions.Add(left);
                 positions.Add(right);
 
-                if (i % 2 == 1)
+                if (i > 1)
                 {
                     int baseIndex = (i - 1) * 2;
                     triangles.Add(baseIndex);
                     triangles.Add(baseIndex + 2);
                     triangles.Add(baseIndex + 1);
 
-                    triangles.Add(baseIndex + 2);
+                    // negative-z direction
                     triangles.Add(baseIndex + 1);
+                    triangles.Add(baseIndex + 2);
                     triangles.Add(baseIndex + 3);
                 }
             }
             mesh.vertices = positions.ToArray();
             mesh.triangles = triangles.ToArray();
+            //List<Vector3> normals = new(positions.Count);
+            //for(int i = 0; i < positions.Count; ++i)
+            //{
+            //    normals.Add(Vector3.back);
+            //}
+            //mesh.normals = normals.ToArray();
 
             MeshCollider collider = gameObject.AddComponent<MeshCollider>();
             collider.sharedMesh = mesh;
