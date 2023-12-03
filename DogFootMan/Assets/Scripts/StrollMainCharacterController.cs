@@ -63,19 +63,10 @@ public class StrollMainCharacterController : MonoBehaviour
 
     void CheckOnPath()
     {
-        var collider = GetComponent<CapsuleCollider>();
-        var ray = new Ray(transform.position, -transform.up * collider.height);
-        RaycastHit hitResult;
-        //if (Physics.SphereCast(transform.position, collider.height, -transform.up, out hitResult) == false)
-        if (Physics.Raycast(ray, out hitResult, collider.height, LayerMask.GetMask("Road")))
+        if(StrollObjectManager.IsOnPath(gameObject) == false)
         {
-            Debug.Log(hitResult.collider.gameObject.name);
+            RigidBody.AddForce(-transform.forward * 1000.0f);
+            Debug.Log("Make sure to follow the walking rule.");
         }
-        else
-        {
-            Debug.Log("out!");
-        }
-        Debug.DrawRay(transform.position, -transform.up * collider.height, Color.black, 60);
-            
     }
 }

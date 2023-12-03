@@ -32635,6 +32635,52 @@ MonoBehaviour:
   showGizmo: 1
   gizmoSize: 1
   gizmoColor: {r: 1, g: 0, b: 0, a: 0.5}
+--- !u!1 &625368184
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 625368186}
+  - component: {fileID: 625368185}
+  m_Layer: 0
+  m_Name: ObjectManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &625368185
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 625368184}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca6558628c1e8bb499bb716c415e459c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CenterObjectToManage: {fileID: 1118260251}
+  HumanPrefab: {fileID: 3567042043470505174, guid: a3f6f340d303ae44caab51bfd9264d03, type: 3}
+--- !u!4 &625368186
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 625368184}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 554.3985, y: 23.628576, z: 2739.023}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &909136875
 GameObject:
   m_ObjectHideFlags: 0
@@ -33541,3 +33587,4 @@ SceneRoots:
   - {fileID: 909136877}
   - {fileID: 208768254}
   - {fileID: 1118260259}
+  - {fileID: 625368186}
