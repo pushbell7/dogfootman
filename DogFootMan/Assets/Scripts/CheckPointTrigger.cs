@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class CheckPointTrigger : MonoBehaviour
 {
-    GameObject NextCheckPoint;
+    int CurrentIndex;
     // Start is called before the first frame update
     void Start()
     {
-        NextCheckPoint = GetComponentInParent<CheckPointManager>().GetNextCheckPoint(gameObject);
+        CurrentIndex = GetComponentInParent<CheckPointManager>().GetIndex(gameObject);
     }
 
     // Update is called once per frame
@@ -18,11 +18,17 @@ public class CheckPointTrigger : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (NextCheckPoint == null) return;
-
-        if(StrollObjectManager.Get().IsMyCharacter(other.gameObject))
+        if (StrollObjectManager.Get().IsMyCharacter(other.gameObject))
         {
-            StrollObjectManager.Get().Spawn(40, NextCheckPoint.transform.position);
+            StrollObjectManager.Get().Spawn(40, CurrentIndex + 1);
+        }
+        else
+        {
+            var strollHuman = other.GetComponent<StrollHumanController>();
+            if(strollHuman)
+            {
+                strollHuman.MakeTargetPosition(CurrentIndex);
+            }
         }
     }
 }

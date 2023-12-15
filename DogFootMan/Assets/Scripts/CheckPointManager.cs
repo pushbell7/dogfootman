@@ -15,19 +15,22 @@ public class CheckPointManager : MonoBehaviour
         }
     }
 
-    public GameObject GetNextCheckPoint(GameObject currentCheckPoint)
+    public int GetIndex(GameObject obj)
     {
-        for(int i = 0; i < transform.childCount; ++i)
+        for (int i = 0; i < CheckPoints.Count; ++i)
         {
-            if (transform.GetChild(i).gameObject == currentCheckPoint)
+            if(CheckPoints[i] == obj)
             {
-                if (i == transform.childCount - 1)
-                {
-                    break;
-                }
-                return transform.GetChild(i + 1).gameObject;
+                return i;
             }
         }
-        return null;
+        return -1;
+    }
+
+    public Vector3 GetPositionFrom(int index)
+    {
+        if (index < 0 || index >= CheckPoints.Count) index = 0;
+
+        return CheckPoints[index].transform.position;
     }
 }

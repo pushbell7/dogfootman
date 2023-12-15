@@ -7,8 +7,8 @@ public class StrollObjectManager : MonoBehaviour
     public GameObject CenterObjectToManage;
     public GameObject HumanPrefab;
     int NumberingIndex = 0;
-    Vector3 LastSpawnPosition;
     List<GameObject> SpawnedHuman;
+    CheckPointManager CheckPointManagerRef;
     static public StrollObjectManager Get()
     {
         return GameObject.Find("ObjectManager").GetComponent<StrollObjectManager>();
@@ -22,8 +22,9 @@ public class StrollObjectManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        CheckPointManagerRef = GameObject.Find("CheckPoints").GetComponent<CheckPointManager>();
         SpawnedHuman = new List<GameObject>();
-        Spawn(20, CenterObjectToManage.transform.position);
+        Spawn(20, 0);
     }
 
     // Update is called once per frame
@@ -45,27 +46,30 @@ public class StrollObjectManager : MonoBehaviour
         }
     }
 
-    public void Spawn(int count, Vector3 spawnPoint)
+    public void Spawn(int count, int checkPointIndexToSpawn)
     {
+        Vector3 spawnPoint = CheckPointManagerRef.GetPositionFrom(checkPointIndexToSpawn);
         for(int i = 0; i < count; ++i)
         {
             GameObject spawnedObject = Instantiate(HumanPrefab);
-            spawnedObject.name = string.Format("human{0}", NumberingIndex++);
+            spawnedObject.name = string.Format("Human{0}", NumberingIndex++);
             spawnedObject.transform.position = GenerateRandomPosition(spawnedObject, spawnPoint);
 
             while (IsOnPath(spawnedObject) == false)
             {
-                // there is under water
-                if(spawnedObject.transform.position.y < 10.0f)
+                bool bIsUnderWater = spawnedObject.transform.position.y < 10.0f;
+                bool bIsTooNear = Vector3.Distance(spawnedObject.transform.position, spawnPoint) < 10.0f;
+                if (bIsUnderWater || bIsTooNear)
                 {
                     spawnedObject.transform.position = GenerateRandomPosition(spawnedObject, spawnPoint);
                     continue;
                 }
+                
                 spawnedObject.transform.position = Vector3.Lerp(spawnedObject.transform.position, spawnPoint, 0.5f);
             }
+            spawnedObject.GetComponent<StrollHumanController>().SetSpawnedCheckPointIndex(checkPointIndexToSpawn);
             SpawnedHuman.Add(spawnedObject);
         }
-        LastSpawnPosition = CenterObjectToManage.transform.position;
         Debug.Log("spawned");
     }
 

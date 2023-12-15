@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 8550824243015959413}
   - component: {fileID: 5880171064096172144}
   - component: {fileID: 1357170767559246379}
+  - component: {fileID: 2245748640808555746}
   m_Layer: 0
   m_Name: HumanStroll
   m_TagString: Untagged
@@ -146,5 +147,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: df8dc12dd496e364aa3204950f42dbd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2245748640808555746
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3567042043470505174}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62dd894f093955445a3a454e95d1a4d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
