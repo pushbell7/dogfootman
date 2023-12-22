@@ -33,4 +33,14 @@ public class CheckPointManager : MonoBehaviour
 
         return CheckPoints[index].transform.position;
     }
+
+    public Vector3 GetDestinationWithRandomRange(int index, bool bIsForward)
+    {
+        if (index < 0 || index >= CheckPoints.Count) index = 0;
+
+        GameObject basePositionObject = CheckPoints[index];
+        Vector3 basePosition = basePositionObject.transform.position;
+        return basePosition - (bIsForward ? 1 : -1) * basePositionObject.transform.forward * Random.Range(0, basePositionObject.transform.localScale.z * 0.3f);
+
+    }
 }
