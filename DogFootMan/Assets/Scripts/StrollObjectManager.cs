@@ -73,6 +73,12 @@ public class StrollObjectManager : MonoBehaviour
         Debug.Log("spawned");
     }
 
+    public void RemoveHuman(GameObject obj)
+    {
+        SpawnedHuman.Remove(obj);
+        Destroy(obj);
+    }
+
     Vector3 GenerateRandomPosition(GameObject spawnedObject, Vector3 spawnPoint)
     {
         Vector3 direction = new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized;

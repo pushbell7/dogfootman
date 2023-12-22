@@ -81,11 +81,26 @@ public class StrollHumanController : MonoBehaviour
     public void MakeTargetPosition(int currentCheckPointIndex)
     {
         if (CheckPointManagerRef == null) return; // when it was spawned on trigger
-        TargetMovingPosition = CheckPointManagerRef.GetDestinationWithRandomRange(currentCheckPointIndex + 1, true);
+
+        if(IsFInishing(currentCheckPointIndex))
+        {
+            StrollObjectManager.Get().RemoveHuman(gameObject);
+            return;
+        }
+        TargetMovingPosition = CheckPointManagerRef.GetDestinationWithRandomRange(GetNextCheckPointIndex(currentCheckPointIndex), bIsForward);
 
         Debug.DrawLine(transform.position, TargetMovingPosition, Color.green, 60.0f);
     }
 
+    bool IsFInishing(int currentIndex)
+    {
+        return GetNextCheckPointIndex(currentIndex) < 0 || GetNextCheckPointIndex(currentIndex) >= CheckPointManagerRef.GetLastIndex();
+    }
+
+    int GetNextCheckPointIndex(int currentIndex)
+    {
+        return currentIndex + (bIsForward ? 1 : -1);
+    }
     public void SetSpawnedCheckPointIndex(int index)
     {
         SpawnedCheckPointIndex = index;

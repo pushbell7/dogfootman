@@ -41,6 +41,10 @@ public class CheckPointManager : MonoBehaviour
         GameObject basePositionObject = CheckPoints[index];
         Vector3 basePosition = basePositionObject.transform.position;
         return basePosition - (bIsForward ? 1 : -1) * basePositionObject.transform.forward * Random.Range(0, basePositionObject.transform.localScale.z * 0.3f);
+    }
 
+    public int GetLastIndex()
+    {
+        return CheckPoints.Count;
     }
 }
