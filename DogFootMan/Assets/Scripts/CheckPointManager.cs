@@ -6,7 +6,7 @@ public class CheckPointManager : MonoBehaviour
 {
     List<GameObject> CheckPoints;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         CheckPoints = new List<GameObject>();
         for (int i = 0; i < transform.childCount; ++i)
