@@ -94,7 +94,7 @@ public class StrollHumanController : MonoBehaviour
 
     bool IsFInishing(int currentIndex)
     {
-        return GetNextCheckPointIndex(currentIndex) < 0 || GetNextCheckPointIndex(currentIndex) >= CheckPointManagerRef.GetLastIndex();
+        return currentIndex == -1 || GetNextCheckPointIndex(currentIndex) < 0 || GetNextCheckPointIndex(currentIndex) >= CheckPointManagerRef.GetLastIndex();
     }
 
     int GetNextCheckPointIndex(int currentIndex)
