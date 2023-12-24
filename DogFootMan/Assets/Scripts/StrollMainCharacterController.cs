@@ -7,6 +7,7 @@ public class StrollMainCharacterController : MonoBehaviour
     private Rigidbody RigidBody;
     private AbilityContainer MyAbility;
     float CurrentRotation;
+    Vector3 LastPositionOnRoad;
     // Start is called before the first frame update
     void Start()
     {
@@ -14,6 +15,14 @@ public class StrollMainCharacterController : MonoBehaviour
         MyAbility = GetComponent<AbilityContainer>();
 
         CurrentRotation = transform.rotation.eulerAngles.y;
+        LastPositionOnRoad = transform.position;
+        //StartCoroutine(TestSetting());
+    }
+
+    IEnumerator TestSetting()
+    {
+        yield return new WaitForSeconds(3);
+        MyAbility.SetMaxSpeed(MyAbility.GetMaxSpeed() * 3);
     }
 
     // Update is called once per frame
@@ -65,8 +74,13 @@ public class StrollMainCharacterController : MonoBehaviour
     {
         if(StrollObjectManager.IsOnPath(gameObject) == false)
         {
-            RigidBody.AddForce(-transform.forward * 1000.0f);
+            transform.position = LastPositionOnRoad;
+            RigidBody.velocity = Vector3.zero;
             Debug.Log("Make sure to follow the walking rule.");
+        }
+        else
+        {
+            LastPositionOnRoad = transform.position;
         }
     }
 }
