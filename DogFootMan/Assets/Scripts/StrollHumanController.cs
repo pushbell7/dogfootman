@@ -9,6 +9,7 @@ public class StrollHumanController : MonoBehaviour
         Idle,
         Move,
         Run,
+        Avoid,
         Max
     }
 
@@ -42,7 +43,7 @@ public class StrollHumanController : MonoBehaviour
         }
     }
 
-    static readonly int[] WEIGHT_OF_STATE = { 1, 7, 2 };
+    static readonly int[] WEIGHT_OF_STATE = { 1, 7, 2, 0 };
     EState MakeState()
     {
         int summary = 0;
@@ -83,6 +84,9 @@ public class StrollHumanController : MonoBehaviour
             case EState.Run:
                 Move(true);
                 break;
+            case EState.Avoid:
+                Avoid();
+                break;
         }
     }
 
@@ -91,9 +95,45 @@ public class StrollHumanController : MonoBehaviour
         MyAbility.SetBoostMode(bIsBoosted);
 
         var forceDirection = (TargetMovingPosition - transform.position).normalized;
-        RigidBody.AddForce(forceDirection * Time.deltaTime * MyAbility.GetPower(), ForceMode.Acceleration);
 
+        var ray = new Ray(transform.position, forceDirection);
+        const float SafeDistance = 15.0f;
+        RaycastHit hitResult;
+        Physics.Raycast(ray, out hitResult, SafeDistance);
+        if (hitResult.collider)
+        {
+            var controller = hitResult.collider.gameObject.GetComponent<StrollHumanController>();
+            if (controller && controller.bIsForward != bIsForward)
+            {
+                SetState(EState.Avoid);
+            }
+
+            var mainController = hitResult.collider.gameObject.GetComponent<StrollMainCharacterController>();
+            if(mainController)
+            {
+                SetState(EState.Avoid);
+            }
+        }
+
+        RigidBody.AddForce(forceDirection * Time.deltaTime * MyAbility.GetPower(), ForceMode.Acceleration);
+        transform.LookAt(forceDirection);
         RigidBody.velocity = Vector3.ClampMagnitude(RigidBody.velocity, MyAbility.GetMaxSpeed());
+    }
+
+    void Avoid()
+    {
+        var forceDirection = (TargetMovingPosition - transform.position).normalized;
+        var ray = new Ray(transform.position, forceDirection);
+        const float SafeDistance = 15.0f;
+        RaycastHit hitResult;
+        Physics.Raycast(ray, out hitResult, SafeDistance);
+        if(hitResult.collider == null || StrollObjectManager.IsOnPath(gameObject) == false)
+        {
+            SetState(EState.Move);
+            return;
+        }
+
+        RigidBody.AddForce(transform.right * Time.deltaTime * MyAbility.GetPower());
     }
 
     public void MakeTargetPosition(int currentCheckPointIndex)
