@@ -20,7 +20,7 @@ public class CheckPointTrigger : MonoBehaviour
     {
         if (StrollObjectManager.Get().IsMyCharacter(other.gameObject))
         {
-            StrollObjectManager.Get().Spawn(40, CurrentIndex + 1);
+            StrollObjectManager.Get().Spawn(20, CurrentIndex + 1);
         }
         else
         {

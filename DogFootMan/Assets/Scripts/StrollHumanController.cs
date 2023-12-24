@@ -37,9 +37,27 @@ public class StrollHumanController : MonoBehaviour
     {
         while (true)
         {
-            SetState((EState)Random.Range(0, ((int)EState.Max)));
+            SetState(MakeState());
             yield return new WaitForSeconds(10.0f);
         }
+    }
+
+    static readonly int[] WEIGHT_OF_STATE = { 1, 7, 2 };
+    EState MakeState()
+    {
+        int summary = 0;
+        foreach(int num in WEIGHT_OF_STATE) { summary += num; }
+
+        int select = Random.Range(0, summary);
+        int resultIndex = 0;
+        foreach(int num in WEIGHT_OF_STATE)
+        {
+            if (select < num) break;
+            select -= num;
+            resultIndex++;
+        }
+
+        return (EState)resultIndex;
     }
 
     void SetState(EState state)
