@@ -83,4 +83,12 @@ public class StrollMainCharacterController : MonoBehaviour
             LastPositionOnRoad = transform.position;
         }
     }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.CompareTag("Obstacles"))
+        {
+            var direction = transform.position - collision.collider.transform.position;
+            RigidBody.AddForce(direction * MyAbility.GetPower());
+        }
+    }
 }

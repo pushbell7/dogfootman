@@ -163,4 +163,5 @@ public class StrollHumanController : MonoBehaviour
     {
         SpawnedCheckPointIndex = index;
     }
+
 }
