@@ -224,4 +224,14 @@ public class AbilityContainer : MonoBehaviour
         MyAbility.Life = 0;
         OnDeathDelegator(gameObject);
     }
+
+    public int GetLife()
+    {
+        return MyAbility.Life;
+    }
+
+    public float GetMaxStamina()
+    {
+        return MyAbility.MaxStamina;
+    }
 }
