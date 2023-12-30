@@ -3,82 +3,85 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class AbilityContainer : MonoBehaviour
+
+
+[System.Serializable]
+public class Ability
 {
-    [System.Serializable]
-    public class Ability
-    {
-        float power;
-        public float Power
-        {
-            get
-            {
-                return bIsBoosted ? power * 3 : power;
-            }
-            set
-            {
-                power = value;
-            }
-        }
-        public float Mass;
-        float maxSpeed;
-        public float MaxSpeed
-        {
-            get
-            {
-                return bIsBoosted ? maxSpeed * 3 : maxSpeed;
-            }
-            set
-            {
-                maxSpeed = value;
-            }
-        }
-        public float MaxStamina;
-        float currentStamina;
-        public float CurrentStamina
-        {
-            get
-            {
-                return currentStamina;
-            }
-            set
-            {
-                currentStamina = MaxStamina < value ? MaxStamina : value;
-                if(currentStamina < 0)
-                {
-                    bIsBoosted = false;
-                }
-            }
-        }
-        public int Life;
-        public EItemType Type;
-        public bool bIsBoosted;
-
-        public void Add(Ability other)
-        {
-            if (other == null) return;
-
-            Power += other.Power;
-            Mass += other.Mass;
-            MaxSpeed += other.MaxSpeed;
-            Life += other.Life;
-        }
-        public void Remove(Ability other)
-        {
-            if (other == null) return;
-
-            Power -= other.Power;
-            Mass -= other.Mass;
-            MaxSpeed -= other.MaxSpeed;
-            //Life -= other.Life;
-        }
-    }
     public enum EItemType
     {
         NoItem,
         RidingItem,
     }
 
+    float power;
+    public float Power
+    {
+        get
+        {
+            return bIsBoosted ? power * 3 : power;
+        }
+        set
+        {
+            power = value;
+        }
+    }
+    public float Mass;
+    float maxSpeed;
+    public float MaxSpeed
+    {
+        get
+        {
+            return bIsBoosted ? maxSpeed * 3 : maxSpeed;
+        }
+        set
+        {
+            maxSpeed = value;
+        }
+    }
+    public float MaxStamina;
+    float currentStamina;
+    public float CurrentStamina
+    {
+        get
+        {
+            return currentStamina;
+        }
+        set
+        {
+            currentStamina = MaxStamina < value ? MaxStamina : value;
+            if (currentStamina < 0)
+            {
+                bIsBoosted = false;
+            }
+        }
+    }
+    public int Life;
+    public EItemType Type;
+    public bool bIsBoosted;
+
+    public void Add(Ability other)
+    {
+        if (other == null) return;
+
+        Power += other.Power;
+        Mass += other.Mass;
+        MaxSpeed += other.MaxSpeed;
+        Life += other.Life;
+    }
+    public void Remove(Ability other)
+    {
+        if (other == null) return;
+
+        Power -= other.Power;
+        Mass -= other.Mass;
+        MaxSpeed -= other.MaxSpeed;
+        //Life -= other.Life;
+    }
+}
+
+public class AbilityContainer : MonoBehaviour
+{
     public static class DefaultAbilityFactory
     {
         class BaseFactory
@@ -124,16 +127,17 @@ public class AbilityContainer : MonoBehaviour
                 ability.Mass = 4.0f;
                 ability.MaxSpeed = 4.0f;
                 ability.Life = 0;
-                ability.Type = EItemType.RidingItem;
+                ability.Type = Ability.EItemType.RidingItem;
                 return ability;
             }
         }
+
 
         public static Ability Make(ObjectManager.ObjectType type)
         {
             if (type == ObjectManager.ObjectType.Car) { return new CarFactory().Make(); }
             else if (type == ObjectManager.ObjectType.Human) { return new HumanFactory().Make(); }
-            else if(type == ObjectManager.ObjectType.MyCharacter) { return new HumanFactory().Make(); }
+            else if(type == ObjectManager.ObjectType.MyCharacter) { return SharedInfo.Get().MyAbility; }
             else if (type == ObjectManager.ObjectType.ItemToRide) { return new KickboardFactory().Make(); }
             else { return new BaseFactory().Make(); }
         }
@@ -143,13 +147,13 @@ public class AbilityContainer : MonoBehaviour
     public delegate void OnDeath(GameObject other);
     public OnDeath OnDeathDelegator;
 
-    Dictionary<EItemType, Ability> ItemContainer;
+    Dictionary<Ability.EItemType, Ability> ItemContainer;
 
     // Start is called before the first frame update
     void Start()
     {
         MyAbility = DefaultAbilityFactory.Make(ObjectManager.GetType(gameObject));
-        ItemContainer = new Dictionary<EItemType, Ability>();
+        ItemContainer = new Dictionary<Ability.EItemType, Ability>();
     }
 
     // Update is called once per frame
@@ -199,7 +203,7 @@ public class AbilityContainer : MonoBehaviour
     }
     public void GetItem(AbilityContainer other)
     {
-        if (other.MyAbility.Type != EItemType.NoItem)
+        if (other.MyAbility.Type != Ability.EItemType.NoItem)
         {
             var otherAbility = other.MyAbility;
             var item = ItemContainer.GetValueOrDefault(otherAbility.Type);
