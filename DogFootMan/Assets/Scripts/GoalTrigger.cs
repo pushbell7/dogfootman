@@ -21,6 +21,7 @@ public class GoalTrigger : MonoBehaviour
         {
             // win
             Debug.Log("win");
+            SharedInfo.Get().MoveToMaintainScene();
         }
     }
 }

@@ -17,6 +17,7 @@ public class MainCharacterController : MonoBehaviour
     static void OnDeathHandler(GameObject MyObject)
     {
         Debug.Log("Die.");
+        SharedInfo.Get().MoveToMaintainScene();
     }
 
     // Update is called once per frame

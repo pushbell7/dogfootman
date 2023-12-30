@@ -97,8 +97,22 @@ public class WorkplaceUIController : MonoBehaviour
         else
         {
             bFinished = true;
-            Debug.Log("game over");
+            SharedInfo.Get().MoveToMaintainScene();
         }
+    }
+
+    void CheckClear()
+    {
+        foreach(var row in SourceItemList)
+        {
+            foreach(var item in row)
+            {
+                if (item.bIsMatched == false) return;
+            }
+        }
+
+        bFinished = true;
+        SharedInfo.Get().MoveToMaintainScene();
     }
 
     bool IsThereItem(EItemType itemType)
@@ -282,6 +296,8 @@ public class WorkplaceUIController : MonoBehaviour
 
         element.RemoveAt(0);
         RemoveElement(element);
+
+        CheckClear();
     }
 
     void RemoveElements(VisualElement fromElement, VisualElement toElement, System.Action<MeshGenerationContext> action)
@@ -293,6 +309,8 @@ public class WorkplaceUIController : MonoBehaviour
 
             EffectLayer.generateVisualContent -= action;
             EffectLayer.MarkDirtyRepaint();
+
+            CheckClear();
         }));
     }
 

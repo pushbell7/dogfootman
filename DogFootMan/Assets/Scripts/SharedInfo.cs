@@ -4,14 +4,18 @@ using UnityEngine;
 
 public class SharedInfo : MonoBehaviour
 {
-    enum ESceneState
+    public enum ESceneState
     {
-        Maintain,
         Quick,
         Workplace,
         Stroll,
+        Max
     }
-    ESceneState CurrentState;
+    public ESceneState NextState
+    {
+        get;
+        private set;
+    }
     public Ability MyAbility
     {
         get;
@@ -22,7 +26,7 @@ public class SharedInfo : MonoBehaviour
     void Awake()
     {
         DontDestroyOnLoad(gameObject);
-        CurrentState = ESceneState.Maintain;
+        NextState = ESceneState.Quick;
 
         MyAbility = AbilityContainer.DefaultAbilityFactory.Make(ObjectManager.ObjectType.Human);
     }
@@ -30,5 +34,15 @@ public class SharedInfo : MonoBehaviour
     public static SharedInfo Get()
     {
         return GameObject.Find("SharedGameObject").GetComponent<SharedInfo>();
+    }
+
+    public void MoveNextScene()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene((int)(NextState) + 1); // Maintain scene is zero.
+        NextState = (ESceneState)(((int)(NextState) + 1) % (int)ESceneState.Max);        
+    }
+    public void MoveToMaintainScene()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene(0); // Maintain scene is zero.
     }
 }

@@ -5,10 +5,12 @@ using UnityEngine;
 public class CheckPointTrigger : MonoBehaviour
 {
     int CurrentIndex;
+    bool bIsLastCheckPoint;
     // Start is called before the first frame update
     void Start()
     {
         CurrentIndex = GetComponentInParent<CheckPointManager>().GetIndex(gameObject);
+        bIsLastCheckPoint = GetComponentInParent<CheckPointManager>().GetLastIndex() == CurrentIndex;
     }
 
     // Update is called once per frame
@@ -20,7 +22,14 @@ public class CheckPointTrigger : MonoBehaviour
     {
         if (StrollObjectManager.Get().IsMyCharacter(other.gameObject))
         {
-            StrollObjectManager.Get().Spawn(20, CurrentIndex + 1);
+            if (bIsLastCheckPoint)
+            {
+                SharedInfo.Get().MoveToMaintainScene();
+            }
+            else
+            {
+                StrollObjectManager.Get().Spawn(20, CurrentIndex + 1);
+            }
         }
         else
         {
