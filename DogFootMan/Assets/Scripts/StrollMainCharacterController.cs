@@ -17,6 +17,11 @@ public class StrollMainCharacterController : MonoBehaviour
         CurrentRotation = transform.rotation.eulerAngles.y;
         LastPositionOnRoad = transform.position;
         //StartCoroutine(TestSetting());
+
+        if(MyAbility.GetCurrentStamina() < MyAbility.GetMaxStamina())
+        {
+            MyAbility.AdjustStamina(MyAbility.GetMaxStamina() / 4);
+        }
     }
 
     IEnumerator TestSetting()

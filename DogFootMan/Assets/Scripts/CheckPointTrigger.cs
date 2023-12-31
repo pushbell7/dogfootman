@@ -10,7 +10,7 @@ public class CheckPointTrigger : MonoBehaviour
     void Start()
     {
         CurrentIndex = GetComponentInParent<CheckPointManager>().GetIndex(gameObject);
-        bIsLastCheckPoint = GetComponentInParent<CheckPointManager>().GetLastIndex() == CurrentIndex;
+        bIsLastCheckPoint = GetComponentInParent<CheckPointManager>().GetLastIndex() - 1 == CurrentIndex;
     }
 
     // Update is called once per frame

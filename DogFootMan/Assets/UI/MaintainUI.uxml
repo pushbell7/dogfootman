@@ -4,7 +4,11 @@
             <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" name="StatusText" />
         </ui:VisualElement>
         <ui:VisualElement style="flex-grow: 1; width: 30%;">
-            <ui:VisualElement name="Shop" style="flex-grow: 1; justify-content: center; height: 70%;" />
+            <ui:VisualElement name="Shop" style="flex-grow: 1; justify-content: center; height: 70%;">
+                <ui:Button text="Increase Hp" parse-escape-sequences="true" display-tooltip-when-elided="true" name="IncreaseHp" />
+                <ui:Button text="Increase Speed" parse-escape-sequences="true" display-tooltip-when-elided="true" name="IncreaseSpeed" />
+                <ui:Button text="Increase Stamina" parse-escape-sequences="true" display-tooltip-when-elided="true" name="IncreaseStamina" />
+            </ui:VisualElement>
             <ui:VisualElement style="flex-grow: 1; height: 30%;">
                 <ui:Button text="Start" parse-escape-sequences="true" display-tooltip-when-elided="true" name="StartButton" />
             </ui:VisualElement>
